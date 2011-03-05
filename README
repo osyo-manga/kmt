@@ -9,21 +9,20 @@
 //
 
 
-:�T�v
-C++ �̔ėp�I���I�����C�u�����B
-C++0x �� Boost �̎g�p��O��Ƃ��ăR�[�f�B���O���s���܂��B
-�w�b�_�[�I�����[�Ȃ̂ŁA�C���N���[�h���邾���Ŏg�p�ł��܂��B
+:概要
+C++ の汎用オレオレライブラリ。
+C++0x と Boost の使用を前提としてコーディングを行います。
+ヘッダーオンリーなので、インクルードするだけで使用できます。
 
 
-:���C�Z���X
+:ライセンス
 Boost Software License - Version 1.0
 <http://www.boost.org/LICENSE_1_0.txt>
 
 
-:��
+:環境
 WindowsXP
-�R���p�C��
+コンパイラ
   -msvc 2010
   -gcc 4.5.2
   -clang 2.9
-
