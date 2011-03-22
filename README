@@ -26,3 +26,6 @@ WindowsXP
   -msvc 2010
   -gcc 4.5.2
   -clang 2.9
+
+文字コードテスト
+
