@@ -70,46 +70,6 @@ call_func(const T& src, C& case_, empty_case&){
 }
 
 //----------------------------------------------------------
-// case_t
-template<typename CaseValueT, typename F, typename Next = empty_case>
-struct case_t{
-	typedef typename result_type<F>::type result_type;
-	typedef Next NextT;
-	
-	explicit case_t(const CaseValueT& s, F func_, const Next& next_ = empty_case())
-		: case_value(s), func(func_), next(next_){}
-	
-	template<typename Next_>
-	case_t<CaseValueT, F, Next_>
-	operator |=(const Next_& next){
-		return case_t<CaseValueT, F, Next_>(case_value, func, next);
-	}
-	
-	result_type
-	operator ()(){
-		return static_cast<result_type>(func());
-	}
-	
-	template<typename U>
-	result_type
-	visit(const U& value){
-		std::cout << case_value << std::endl;
-		return call_func(value, *this, next);
-	}
-	
-	template<typename T>
-	bool
-	equal(const T& rhs){
-		return detail::equal(case_value, rhs);
-	}
-	
-private:
-	CaseValueT	case_value;
-	F			func;
-	Next		next;
-};
-
-//----------------------------------------------------------
 // case_expression_impl
 template<typename caseT, typename expressionT, typename nextT = empty_case>
 struct case_expression_impl{
@@ -293,62 +253,6 @@ var(T const& t){
 	return detail::functionable_holder<T const&>(t);
 }
 
-#if 0
-
-template<typename T>
-detail::switch_t<T>
-switch_(const T& t){
-	return detail::switch_t<T>(t);
-}
-
-template<typename T, typename F>
-detail::case_t<T, F&>
-case_(const T& t, F& func){
-	return detail::case_t<T, F&>(t, func);
-}
-template<typename T, typename F>
-detail::case_t<T, const F&>
-case_(const T& t, const F& func){
-	return detail::case_t<T, const F&>(t, func);
-}
-
-template<typename F>
-detail::case_t<detail::true_, F&>
-default_(F& func){
-	return detail::case_t<detail::true_, F&>(_, func);
-}
-
-template<typename F>
-detail::case_t<detail::true_, const F&>
-default_(const F& func){
-	return detail::case_t<detail::true_, const F&>(_, func);
-}
-
-
-// 引数が2個以上の場合は、boost::tuple で保持
-template<typename T1, typename T2>
-detail::switch_t<boost::tuple<T1, T2> >
-switch_(const T1& t1, const T2& t2){
-	return detail::switch_t<boost::tuple<T1, T2> >
-		(boost::make_tuple(t1, t2));
-}
-
-template<typename T1, typename T2, typename F>
-detail::case_t<boost::tuple<T1, T2>, F&>
-case_(const T1& t1, const T2& t2, F& func){
-	return detail::case_t<boost::tuple<T1, T2>, F&>
-		(boost::make_tuple(t1, t2), func);
-}
-
-template<typename T1, typename T2, typename F>
-detail::case_t<boost::tuple<T1, T2>, const F&>
-case_(const T1& t1, const T2& t2, const F& func){
-	return detail::case_t<boost::tuple<T1, T2>, const F&>
-		(boost::make_tuple(t1, t2), func);
-}
-
-#else
-
 template<typename T>
 detail::switch_t<T>
 switch_(const T& t){
@@ -375,8 +279,6 @@ detail::case_impl<boost::tuple<T1, T2> >
 case_(const T1& t1, const T2& t2){
 	return case_( boost::make_tuple(t1, t2) );
 }
-
-#endif
 
 }  // namespace switch_case
 }  // namespace kmt
