@@ -19,12 +19,16 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/utility/result_of.hpp>
+#include <boost/mpl/placeholders.hpp>
+#include <boost/mpl/apply.hpp>
 
 namespace kmt{
 
 namespace switch_case{
 
 namespace detail{
+
+namespace mpl = boost::mpl;
 
 template<typename F>
 struct result_type : boost::result_of<F()>{};
@@ -69,51 +73,6 @@ call_func(const T& src, C& case_, empty_case&){
 	if( case_.equal(src) ) case_();
 }
 
-//----------------------------------------------------------
-// case_expression_impl
-template<typename caseT, typename nextT, typename expressionT>
-struct case_expression_impl{
-	typedef caseT       case_type;
-	typedef expressionT expression_type;
-	typedef nextT       next_type;
-	typedef typename expression_type::result_type result_type;
-	
-	explicit case_expression_impl(
-		const case_type& case__,
-		const next_type& next,
-		expression_type expression
-	)\
-	: case_(case__), expression_(expression), next_(next){}
-	
-	template<typename new_nextT>
-	case_expression_impl<case_type, new_nextT, expression_type>
-	operator |=(const new_nextT& next) const{
-		return case_expression_impl<case_type, new_nextT, expression_type>
-			(case_, next, expression_);
-	}
-	
-	result_type
-	operator ()(){
-		return expression_();
-	}
-	
-	template<typename U>
-	result_type
-	visit(const U& value){
-		return call_func(value, *this, next_);
-	}
-	
-	template<typename T>
-	bool
-	equal(const T& t) const{
-		return case_.equal(t);;
-	}
-private:
-	case_type case_;
-	expression_type expression_;
-	next_type next_;
-};
-
 template<typename F>
 struct eval_impl{
 	typedef F func_type;
@@ -144,62 +103,12 @@ private:
 	value_type value_;
 };
 
-
-template<typename T, typename nextT = empty_case>
-struct case_impl{
-	typedef T     value_type;
-	typedef nextT next_type;
-	typedef case_impl<T, nextT> case_type;
-	typedef typename next_type::result_type result_type;
+template<typename T>
+struct case_value{
+	typedef T value_type;
 	
-	explicit case_impl(
-		const value_type& value,
-		const next_type& next = empty_case()
-	)
-	: value_(value), next_(next){}
-	
-	template<typename new_nextT>
-	case_impl<value_type, new_nextT>
-	operator |=(const new_nextT& next) const{
-		return case_impl<value_type, new_nextT>(value_, next);
-	}
-	
-	template<typename F>
-	case_expression_impl<case_type, next_type, eval_impl<F&> >
-	operator |(F& f) const{
-		return case_expression_impl<case_type, next_type, eval_impl<F&> >
-			(*this, next_, eval_impl<F&>(f));
-	}
-	template<typename F>
-	case_expression_impl<case_type, next_type, eval_impl<F const&> >
-	operator |(F const& f) const{
-		return case_expression_impl<case_type, next_type, eval_impl<F const&> >
-			(*this, next_, eval_impl<F const&>(f));
-	}
-	
-	template<typename T>
-	case_expression_impl<case_type, next_type, value_impl<T&> >
-	operator &(T& t) const{
-		return case_expression_impl<case_type, next_type, value_impl<T&> >
-			(*this, next_, value_impl<T&>(t));
-	}
-	template<typename T>
-	case_expression_impl<case_type, next_type, value_impl<T const&> >
-	operator &(T const& t) const{
-		return case_expression_impl<case_type, next_type, value_impl<T const&> >
-			(*this, next_, value_impl<T const&>(t));
-	}
-	
-	result_type
-	operator ()(){
-		return next_();
-	}
-	
-	template<typename U>
-	result_type
-	visit(const U& value){
-		return call_func(value, *this, next_);
-	}
+	case_value(const value_type& value)
+		: value_(value){}
 	
 	template<typename U>
 	bool
@@ -209,8 +118,141 @@ struct case_impl{
 	
 private:
 	value_type value_;
-	next_type  next_;
 };
+
+template<typename T, typename Pred = boost::is_same<mpl::_1, mpl::_2> >
+struct case_type{
+	template<typename U>
+	bool equal(const U&) const{
+		return mpl::apply<Pred, U, T>::type::value;
+	}
+};
+
+
+template<typename caseT, typename nextT = empty_case>
+struct case_impl{
+	typedef caseT case_type;
+	typedef nextT next_type;
+	typedef case_impl<case_type, next_type> this_type;
+	typedef typename next_type::result_type result_type;
+	
+	explicit case_impl(
+		const case_type& case__,
+		const next_type& next = empty_case()
+	)
+	: case_(case__), next_(next){}
+	
+	template<typename new_nextT>
+	case_impl<case_type, new_nextT>
+	operator |=(const new_nextT& next) const{
+		return case_impl<case_type, new_nextT>(case_, next);
+	}
+	
+	result_type
+	operator ()(){
+		return get_next()();
+	}
+
+	template<typename U>
+	result_type
+	visit(const U& value){
+		return call_func(value, *this, next_);
+	}
+	
+	template<typename U>
+	bool
+	equal(const U& u) const{
+		return case_.equal(u);
+	}
+	
+	next_type& get_next(){
+		return next_;
+	}
+	next_type const& get_next() const{
+		return next_;
+	}
+private:
+	case_type case_;
+	next_type next_;
+};
+
+//----------------------------------------------------------
+// case_expression_impl
+template<typename caseT, typename nextT, typename expressionT>
+struct case_expression_impl{
+	typedef caseT       case_type;
+	typedef expressionT expression_type;
+	typedef nextT       next_type;
+	typedef typename expression_type::result_type result_type;
+	
+	explicit case_expression_impl(
+		const case_type& case__,
+		const next_type& next,
+		expression_type expression
+	)
+	: case_(case__), expression_(expression), next_(next){}
+	
+	template<typename new_nextT>
+	case_expression_impl<case_type, new_nextT, expression_type>
+	operator |=(const new_nextT& next) const{
+		return case_expression_impl<case_type, new_nextT, expression_type>
+			(case_, next, expression_);
+	}
+	
+	
+	result_type
+	operator ()(){
+		return expression_();
+	}
+	
+	template<typename U>
+	result_type
+	visit(const U& value){
+		return call_func(value, *this, next_);
+	}
+	
+	template<typename T>
+	bool
+	equal(const T& t) const{
+		return case_.equal(t);;
+	}
+private:
+	case_type case_;
+	expression_type expression_;
+	next_type next_;
+};
+
+
+
+template<typename T, typename next_type, typename F>
+case_expression_impl<case_impl<T, next_type>, next_type, eval_impl<F&> >
+operator |(case_impl<T, next_type> const& case_, F& f){
+	return case_expression_impl<case_impl<T, next_type>, next_type, eval_impl<F&> >
+		(case_, case_.get_next(), eval_impl<F&>(f));
+}
+
+template<typename T, typename next_type, typename F>
+case_expression_impl<case_impl<T, next_type>, next_type, eval_impl<F const&> >
+operator |(case_impl<T, next_type> const& case_, F const& f){
+	return case_expression_impl<case_impl<T, next_type>, next_type, eval_impl<F const&> >
+		(case_, case_.get_next(), eval_impl<F const&>(f));
+}
+
+
+template<typename T, typename next_type, typename U>
+case_expression_impl<case_impl<T, next_type>, next_type, value_impl<U&> >
+operator &(case_impl<T, next_type> const& case_, U& value){
+	return case_expression_impl<case_impl<T, next_type>, next_type, value_impl<U> >
+		(case_, case_.get_next(), value_impl<U>(value));
+}
+
+template<typename T, typename next_type, typename U>
+case_expression_impl<case_impl<T, next_type>, next_type, value_impl<U const&> >
+operator &(case_impl<T, next_type> const& case_, U const& value){
+	return case_expression_impl<case_impl<T, next_type>, next_type, value_impl<U const&> >
+		(case_, case_.get_next(), value_impl<U const&>(value));
+}
+
 
 //----------------------------------------------------------
 // switch_t
@@ -289,9 +331,15 @@ switch_(const T& t){
 }
 
 template<typename T>
-detail::case_impl<T>
+detail::case_impl<detail::case_value<T> >
 case_(const T& t){
-	return detail::case_impl<T>(t);
+	return detail::case_impl<detail::case_value<T> >(detail::case_value<T>(t));
+}
+
+template<typename T>
+detail::case_impl<detail::case_type<T> >
+case_(){
+	return detail::case_impl<detail::case_type<T> >(detail::case_type<T>());
 }
 
 
@@ -304,7 +352,7 @@ switch_(const T1& t1, const T2& t2){
 }
 
 template<typename T1, typename T2>
-detail::case_impl<boost::tuple<T1, T2> >
+detail::case_impl<detail::case_value<boost::tuple<T1, T2> > >
 case_(const T1& t1, const T2& t2){
 	return case_( boost::make_tuple(t1, t2) );
 }

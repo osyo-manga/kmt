@@ -15,7 +15,7 @@ template<typename T>
 void
 hoge(T t){
 	using boost::mpl::print;
-	typedef typename print<T>::type Ttype;
+//	typedef typename print<T>::type Ttype;
 }
 
 void
@@ -31,6 +31,21 @@ test(){
 	std::cout << n << std::endl;
 }
 
+template<typename T>
+void
+test2(const T& t){
+	using sc::var;
+	using sc::switch_;
+	using sc::case_;
+	using sc::default_;
+	std::string result;
+	result = switch_(t)
+		|=case_<std::string>()&std::string("string")
+		|=case_<int>()&std::string("int")
+		|=default_&std::string("no match");
+	std::cout << result << std::endl;
+}
+
 
 void
 fizz_buzz(int n){
@@ -38,10 +53,9 @@ fizz_buzz(int n){
 	
 	std::string result = sc::switch_(n%3, n%5)
 		|=sc::case_(0,0)|sc::var(std::string("fizz_buzz"))
-		|=sc::case_(0,_)|sc::var(std::string("fizz"))
-		|=sc::case_(_,0)|sc::var(std::string("buzz"))
-		|=sc::default_|sc::var(boost::lexical_cast<std::string>(n));
-	
+		|=sc::case_(0,_)&(std::string("fizz"))
+		|=sc::case_(_,0)&(std::string("buzz"))
+		|=sc::default_&(boost::lexical_cast<std::string>(n));
 	std::cout << result << std::endl;
 }
 
@@ -49,10 +63,16 @@ fizz_buzz(int n){
 int
 main(){
 	
-//	test();
+	test();
+	test2(std::string(""));
+	test2(0);
+	test2(0.0f);
+	std::string hoge;
+	test2(hoge);
 	
 	std::string input = "yes";
-	std::string result = sc::switch_(input)
+	std::string result
+	= sc::switch_(input)
 		|=sc::case_(std::string("yes"))
 		|=sc::case_(std::string("y"))
 		|=sc::case_(std::string("Y"))|sc::var(std::string("ok"))
