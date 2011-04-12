@@ -71,7 +71,7 @@ call_func(const T& src, C& case_, empty_case&){
 
 //----------------------------------------------------------
 // case_expression_impl
-template<typename caseT, typename expressionT, typename nextT = empty_case>
+template<typename caseT, typename nextT, typename expressionT>
 struct case_expression_impl{
 	typedef caseT       case_type;
 	typedef expressionT expression_type;
@@ -80,21 +80,21 @@ struct case_expression_impl{
 	
 	explicit case_expression_impl(
 		const case_type& case__,
-		expression_type expression,
-		const next_type& next = empty_case()
-	)
+		const next_type& next,
+		expression_type expression
+	)\
 	: case_(case__), expression_(expression), next_(next){}
 	
 	template<typename new_nextT>
-	case_expression_impl<case_type, expression_type, new_nextT>
+	case_expression_impl<case_type, new_nextT, expression_type>
 	operator |=(const new_nextT& next) const{
-		return case_expression_impl<case_type, expression_type, new_nextT>
-			(case_, expression_, next);
+		return case_expression_impl<case_type, new_nextT, expression_type>
+			(case_, next, expression_);
 	}
 	
 	result_type
 	operator ()(){
-		return static_cast<result_type>(expression_());
+		return expression_();
 	}
 	
 	template<typename U>
@@ -115,19 +115,35 @@ private:
 };
 
 template<typename F>
-struct expression_impl{
+struct eval_impl{
 	typedef F func_type;
 	typedef typename result_type<func_type>::type result_type;
 	
-	explicit expression_impl(F f) : func_(f){}
+	explicit eval_impl(F f) : func_(f){}
 	
 	result_type
 	operator ()(){
-		return func_();
+		return static_cast<result_type>(func_());
 	}
 private:
 	func_type func_;
 };
+
+template<typename T>
+struct value_impl{
+	typedef T value_type;
+	typedef value_type result_type;
+	
+	explicit value_impl(value_type value) : value_(value){}
+	
+	result_type
+	operator ()(){
+		return static_cast<result_type>(value_);
+	}
+private:
+	value_type value_;
+};
+
 
 template<typename T, typename nextT = empty_case>
 struct case_impl{
@@ -149,16 +165,29 @@ struct case_impl{
 	}
 	
 	template<typename F>
-	case_expression_impl<case_type, expression_impl<F&>, next_type>
+	case_expression_impl<case_type, next_type, eval_impl<F&> >
 	operator |(F& f) const{
-		return case_expression_impl<case_type, expression_impl<F&>, next_type>
-			(*this, expression_impl<F&>(f), next_);
+		return case_expression_impl<case_type, next_type, eval_impl<F&> >
+			(*this, next_, eval_impl<F&>(f));
 	}
 	template<typename F>
-	case_expression_impl<case_type, expression_impl<F const&>, next_type>
+	case_expression_impl<case_type, next_type, eval_impl<F const&> >
 	operator |(F const& f) const{
-		return case_expression_impl<case_type, expression_impl<F const&>, next_type>
-			(*this, expression_impl<F const&>(f), next_);
+		return case_expression_impl<case_type, next_type, eval_impl<F const&> >
+			(*this, next_, eval_impl<F const&>(f));
+	}
+	
+	template<typename T>
+	case_expression_impl<case_type, next_type, value_impl<T&> >
+	operator &(T& t) const{
+		return case_expression_impl<case_type, next_type, value_impl<T&> >
+			(*this, next_, value_impl<T&>(t));
+	}
+	template<typename T>
+	case_expression_impl<case_type, next_type, value_impl<T const&> >
+	operator &(T const& t) const{
+		return case_expression_impl<case_type, next_type, value_impl<T const&> >
+			(*this, next_, value_impl<T const&>(t));
 	}
 	
 	result_type
