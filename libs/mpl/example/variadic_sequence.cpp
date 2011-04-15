@@ -43,7 +43,7 @@ BOOST_MPL_ASSERT(( mpl::equal<
 
 namespace fusion = boost::fusion;
 
-/*
+
 template<typename ...Args>
 struct variadic_fusion_vector :
 	fusion::result_of::as_vector<
@@ -66,7 +66,7 @@ struct variadic_fusion_vector :
 	explicit variadic_fusion_vector(UArgs&&... args)
 		: base_type(std::forward<UArgs>(args)...){}
 };
-*/
+
 
 #include <iostream>
 #include <boost/fusion/include/io.hpp>
