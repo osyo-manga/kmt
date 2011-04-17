@@ -52,5 +52,13 @@ main(){
 	}
 	std::cout << std::endl;
 	
+	try{
+		sc::switch_(0)
+			|=sc::case_(1)&10;
+	}
+	catch(std::exception& exp){
+		std::cout << exp.what() << std::endl;
+	}
+	
 	return 0;
 }
