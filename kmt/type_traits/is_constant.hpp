@@ -11,8 +11,8 @@
 // Boost Software License - Version 1.0
 // <http://www.boost.org/LICENSE_1_0.txt>
 //
-#ifndef _KMT_TYPE_TRAITS_IS_CONSTANT_H_
-#define _KMT_TYPE_TRAITS_IS_CONSTANT_H_
+#ifndef KMT_TYPE_TRAITS_IS_CONSTANT_H
+#define KMT_TYPE_TRAITS_IS_CONSTANT_H
 
 #include <boost/type_traits/integral_constant.hpp>
 #include <boost/mpl/bool.hpp>

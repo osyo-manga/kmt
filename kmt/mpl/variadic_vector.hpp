@@ -11,8 +11,8 @@
 // Boost Software License - Version 1.0
 // <http://www.boost.org/LICENSE_1_0.txt>
 //
-#ifndef _KMT_MPL_VARIADIC_VECTOR_H_
-#define _KMT_MPL_VARIADIC_VECTOR_H_
+#ifndef KMT_MPL_VARIADIC_VECTOR_H
+#define KMT_MPL_VARIADIC_VECTOR_H
 
 #include <boost/config.hpp>
 
@@ -43,4 +43,4 @@ BOOST_STATIC_ASSERT(false && "No Supported Variadic Templates");
 #endif
 
 
-#endif /* _KMT_MPL_VARIADIC_VECTOR_H_ */
+#endif /* KMT_MPL_VARIADIC_VECTOR_H */

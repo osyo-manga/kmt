@@ -30,8 +30,8 @@ struct result{
 		boost::is_same<boost::mpl::_1, boost::mpl::_2>
 	>::type type1;
 	typedef typename boost::mpl::remove<type1, void>::type type;
-
 };
+
 
 template<typename Seq>
 struct result<sc::detail::empty_case, Seq>{
@@ -53,14 +53,17 @@ test(){
 	using sc::case_;
 	hoge(case_(0)|=case_(1)|var(1) );
 //	switch_(0)|=case_(0)|=case_(1)|=case_(2);
+/*
 	int n = switch_(0)
 		|=case_(0)
 		|=case_(1)|var(1)
 		|=case_(2)
 		|=case_(3)&0;
 	std::cout << n << std::endl;
+*/
 }
 
+#if 0
 template<typename T>
 void
 test2(const T& t){
@@ -105,15 +108,8 @@ fizz_buzz_disp(int n){
 		|=sc::default_expr(std::cout << constant(boost::lexical_cast<std::string>(n)) << "\n");
 }
 
-int
-main(){
-	
-	test();
-	test2(std::string(""));
-	test2(0);
-	test2(0.0f);
-	std::string hoge;
-	test2(hoge);
+void
+test3(){
 	
 	std::string input = "yes";
 	std::string result
@@ -123,11 +119,37 @@ main(){
 		|=sc::case_(std::string("Y"))|sc::var(std::string("ok"))
 		|=sc::default_&std::string("error");
 	std::cout << result << std::endl;
+
+}
+
+void
+run(){
+		test();
+	test2(std::string(""));
+	test2(0);
+	test2(0.0f);
+	std::string hoge;
+	test2(hoge);
+	tese3();
 	
 	for(int i = 1 ; i < 20 ; ++i){
 		fizz_buzz(i);
 		fizz_buzz_disp(i);
 	}
+	try{
+		sc::switch_(0)
+			|=sc::case_(1)&10;
+	}
+	catch(std::exception& exp){
+		std::cout << exp.what() << std::endl;
+	}
+}
+#endif
+
+int
+main(){
+	test();
+//	run();
 	
 	return 0;
 }

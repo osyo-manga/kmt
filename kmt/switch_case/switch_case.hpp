@@ -11,8 +11,8 @@
 // Boost Software License - Version 1.0
 // <http://www.boost.org/LICENSE_1_0.txt>
 //
-#ifndef _KMT_SWITCH_CASE_SWITCH_CASE_H_
-#define _KMT_SWITCH_CASE_SWITCH_CASE_H_
+#ifndef KMT_SWITCH_CASE_SWITCH_CASE_H
+#define KMT_SWITCH_CASE_SWITCH_CASE_H
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
@@ -56,11 +56,23 @@ call_func(const T& src, C& case_, N& next){
 	return case_.equal(src) ? case_() :  next.visit(src);
 }
 
+// 戻り値がある場合は、問答無用で最後の関数が呼ばれる
 template<typename T, typename C>
-typename result_type<C>::type
+typename boost::lazy_disable_if<boost::is_same<
+	typename C::result_type, void
+>, result_type<C> >::type
 call_func(const T& src, C& case_, empty_case&){
 	if( case_.equal(src) ) return case_();
 	else throw(no_match("!exception! : no match switch case"));
+}
+
+// 戻り値がない場合は、こちらが呼ばれる
+template<typename T, typename C>
+typename boost::enable_if<boost::is_same<
+	typename C::result_type, void
+>, void>::type
+call_func(const T& src, C& case_, empty_case&){
+	if( case_.equal(src) ) case_();
 }
 
 template<typename F>
@@ -117,7 +129,6 @@ struct case_type{
 		return mpl::apply<Pred, T>::type::value;
 	}
 };
-
 
 template<typename caseT, typename nextT = empty_case>
 struct case_impl{
@@ -211,13 +222,6 @@ struct case_expression_impl{
 		return case_.equal(t);
 	}
 	
-	next_type& get_next(){
-		return case_.get_next();
-	}
-	next_type const& get_next() const{
-		return case_.get_next();
-	}
-
 private:
 	case_type case_;
 	expression_type expression_;
@@ -350,7 +354,6 @@ case_(){
 
 
 
-
 // 引数が2個以上の場合は、boost::tuple で保持
 template<typename T1, typename T2>
 detail::switch_t<boost::tuple<T1, T2> >
@@ -429,8 +432,9 @@ case_expr(const T1& t1, const T2& t2, F const& f){
 	return case_expr( boost::make_tuple(t1, t2), f);
 }
 
+
 }  // namespace switch_case
 }  // namespace kmt
 
-#endif // #ifdef _KMT_SWITCH_CASE_SWITCH_CASE_H_
+#endif // #ifdef KMT_SWITCH_CASE_SWITCH_CASE_H
 
