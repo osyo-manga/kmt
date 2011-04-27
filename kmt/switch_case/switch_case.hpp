@@ -17,15 +17,15 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/is_same.hpp>
 #include <boost/utility/result_of.hpp>
-#include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/apply.hpp>
-#include <boost/type_traits/is_base_of.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/has_xxx.hpp>
 #include <boost/type_traits/is_void.hpp>
+#include <boost/type_traits/is_base_of.hpp>
+
 #include "exception.hpp"
+
 
 namespace kmt{ namespace switch_case{
 
@@ -41,11 +41,6 @@ struct result_of<F&> : result_of<F>{};
 
 template<typename F>
 struct result_of<F const&> : result_of<F>{};
-
-struct empty_case{
-	typedef void result_type;
-	
-};
 
 template<typename T, typename U>
 bool equal(const T& t, const U& u){
@@ -146,13 +141,19 @@ private:
 };
 
 template<typename caseT, typename exprT>
-case_expr<caseT, exprT>
-operator |(caseT const& case_, exprT expr){
-	return case_expr<caseT, exprT>(case_, expr);
+case_expr<caseT, exprT&>
+operator |(caseT const& case_, exprT& expr){
+	return case_expr<caseT, exprT&>(case_, expr);
+}
+
+template<typename caseT, typename exprT>
+case_expr<caseT, exprT const&>
+operator |(caseT const& case_, exprT const& expr){
+	return case_expr<caseT, exprT const&>(case_, expr);
 }
 
 
-template<typename caseT, typename nextT = empty_case>
+template<typename caseT, typename nextT>
 struct case_next
 	: caseT{
 	typedef caseT case_type;
@@ -160,7 +161,7 @@ struct case_next
 	typedef nextT next_type;
 	typedef typename next_type::result_type result_type;
 	
-	case_next(case_type const& case_, next_type next = empty_case())
+	case_next(case_type const& case_, next_type next)
 		: base_type(case_), next_(next){}
 	
 	result_type
@@ -271,10 +272,16 @@ switch_(const T& t){
 	return detail::switch_t<T>(t);
 }
 
+template<typename Pred>
+detail::case_impl<Pred>
+case_pred(Pred const& pred){
+	return detail::case_impl<Pred>(pred);
+}
+
 template<typename T>
 detail::case_impl<detail::equal_value<T> >
 case_(T const& t){
-	return detail::case_impl<detail::equal_value<T> >(detail::equal_value<T>(t));
+	return case_pred(detail::equal_value<T>(t));
 }
 
 

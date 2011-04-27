@@ -20,6 +20,7 @@
 
 namespace sc = kmt::switch_case;
 
+/*
 template<typename T, typename Seq = boost::mpl::vector<> >
 struct result{
 	typedef typename boost::mpl::push_back<
@@ -33,12 +34,11 @@ struct result{
 	typedef typename boost::mpl::remove<type1, void>::type type;
 };
 
-
 template<typename Seq>
 struct result<sc::detail::empty_case, Seq>{
 	typedef Seq type0;
 };
-
+*/
 
 template<typename T>
 void
@@ -50,7 +50,7 @@ hoge(T t){
 struct disp{
 	typedef void result_type;
 	disp(std::string str) : str_(str){}
-	void operator()(){
+	void operator()() const{
 		std::cout << str_ << std::endl;
 	}
 private:
