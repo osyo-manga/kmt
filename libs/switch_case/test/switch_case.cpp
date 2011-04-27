@@ -72,12 +72,20 @@ test3(std::string input){
 void
 test(){
 	using sc::case_;
-	sc::switch_(2)
+	sc::switch_(1)
 		|=case_(0)
-		|=case_(1)|disp("test")
+		|=case_(1)|disp("test")|disp("hogehoge")
 		|=case_(2)|disp("test2");
+	sc::switch_(0)|=case_(0);
+	sc::switch_(0)|=case_(0)|disp("test");
 	
-//	switch_(0)|=case_(0)|=case_(1)|=case_(2);
+	try{
+		sc::switch_(1)|=case_(0)|disp("no exp");
+		sc::switch_(1)|=case_(0)|sc::var(std::string("hoge"));
+	}
+	catch(std::exception& exp){
+		std::cout << "exp :" << exp.what() << std::endl;
+	}
 /*
 	int n = switch_(0)
 		|=case_(0)

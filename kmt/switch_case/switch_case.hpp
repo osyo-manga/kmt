@@ -24,24 +24,23 @@
 #include <boost/type_traits/is_base_of.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/has_xxx.hpp>
-
+#include <boost/type_traits/is_void.hpp>
 #include "exception.hpp"
 
 namespace kmt{ namespace switch_case{
-
 
 namespace detail{
 
 namespace mpl = boost::mpl;
 
 template<typename F>
-struct result_type : boost::result_of<F()>{};
+struct result_of : boost::result_of<F()>{};
 
 template<typename F>
-struct result_type<F&> : result_type<F>{};
+struct result_of<F&> : result_of<F>{};
 
 template<typename F>
-struct result_type<F const&> : result_type<F>{};
+struct result_of<F const&> : result_of<F>{};
 
 struct empty_case{
 	typedef void result_type;
@@ -77,10 +76,8 @@ struct equal_type{
 
 
 BOOST_MPL_HAS_XXX_TRAIT_DEF(expr_type);
-
 template<typename T>
-struct is_fall_through
-	: boost::mpl::not_<has_expr_type<T> >{};
+struct is_fall_through : boost::mpl::not_<has_expr_type<T> >{};
 
 
 template<typename Pred>
@@ -97,7 +94,7 @@ struct case_impl{
 	}
 	
 	result_type
-	operator ()(){}
+	operator ()() const{};
 	
 	template<typename T>
 	result_type
@@ -111,23 +108,40 @@ struct case_expr : caseT{
 	typedef caseT case_type;
 	typedef case_type base_type;
 	typedef ExprT expr_type;
-	typedef typename expr_type::result_type  result_type;
+	typedef typename result_of<expr_type>::type result_type;
 	
 	case_expr(case_type const& case_, expr_type expr)
 		: base_type(case_), expr_(expr){}
 	
 	result_type
 	operator ()(){
+		static_cast<base_type>(*this)();
 		return expr_();
 	}
 	
 	template<typename T>
 	result_type
 	visit(T const& src){
-		if( base_type::equal(src) ) return (*this)();
-		else throw(no_match("!exception! : no match switch case"));
+		return eval(src);
 	}
+	
 private:
+	template<typename T>
+	result_type
+	eval(T const& src){
+		return ( base_type::equal(src) ) ? (*this)() : no_match<result_type>();
+	}
+	
+	// 戻り値型が void 以外の場合のみ例外を飛ばす
+	template<typename T>
+	result_type
+	no_match(typename boost::disable_if<boost::is_void<T> >::type* =0){
+		throw(switch_case::no_match("!exception! : no match switch case"));
+	}
+	template<typename T>
+	result_type
+	no_match(typename boost::enable_if<boost::is_void<T> >::type* =0){}
+	
 	expr_type expr_;
 };
 
@@ -154,6 +168,13 @@ struct case_next
 		return eval<case_type>();
 	}
 	
+	template<typename T>
+	result_type
+	visit(T const& src){
+		return ( base_type::equal(src) ) ? (*this)() : next_.visit(src);
+	}
+	
+private:
 	template<typename U>
 	result_type
 	eval(typename boost::enable_if<is_fall_through<U> >::type* =0){
@@ -163,15 +184,9 @@ struct case_next
 	template<typename U>
 	result_type
 	eval(typename boost::disable_if<is_fall_through<U> >::type* =0){
-		return static_cast<case_type&>(*this)();
+		return static_cast<base_type&>(*this)();
 	}
 	
-	template<typename T>
-	result_type
-	visit(T const& src){
-		return ( base_type::equal(src) ) ? (*this)() : next_.visit(src);
-	}
-private:
 	next_type next_;
 };
 
