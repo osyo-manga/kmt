@@ -279,6 +279,12 @@ case_pred(Pred const& pred){
 }
 
 template<typename T>
+detail::case_impl<detail::equal_type<T> >
+case_type(){
+	return case_pred(detail::equal_type<T>());
+}
+
+template<typename T>
 detail::case_impl<detail::equal_value<T> >
 case_(T const& t){
 	return case_pred(detail::equal_value<T>(t));

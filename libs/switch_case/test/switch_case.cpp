@@ -57,6 +57,15 @@ private:
 	std::string str_;
 };
 
+template<typename T>
+void
+test2(T t){
+	sc::switch_(t)
+		|=sc::case_type<int>()|disp("int")
+		|=sc::case_type<std::string>()|disp("string")
+		|=sc::case_type<float>()|disp("float")
+		|=sc::default_|disp("other type");
+}
 
 std::string
 test3(std::string input){
@@ -68,6 +77,7 @@ test3(std::string input){
 		|=sc::default_|sc::var(std::string("error"));
 	return result;
 }
+
 
 void
 test(){
@@ -96,6 +106,10 @@ test(){
 */
 	std::cout << test3("yes") << std::endl;
 	std::cout << test3("no") << std::endl;
+	test2(10);
+	test2(3.14f);
+	test2(std::string("hoge"));
+	test2(long(10));
 }
 
 #if 0
