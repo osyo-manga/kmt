@@ -14,12 +14,12 @@
 #ifndef KMT_SWITCH_CASE_EXCEPTION_H
 #define KMT_SWITCH_CASE_EXCEPTION_H
 
-#include <exception>
+#include <stdexcept>
 
 namespace kmt{ namespace switch_case {
 
-struct no_match : std::exception{
-	no_match(char const* error) : std::exception(error){}
+struct no_match : std::runtime_error{
+	no_match(char const* error) : std::runtime_error(error){}
 };
 
 } } // namespace kmt{ namespace switch_case {

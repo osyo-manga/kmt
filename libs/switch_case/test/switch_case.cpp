@@ -15,6 +15,7 @@
 #include <boost/mpl/unique.hpp>
 #include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/remove.hpp>
+#include <boost/mpl/vector.hpp>
 
 
 namespace sc = kmt::switch_case;
@@ -46,12 +47,36 @@ hoge(T t){
 ///	typedef typename print<T>::type Ttype;
 }
 
+struct disp{
+	typedef void result_type;
+	disp(std::string str) : str_(str){}
+	void operator()(){
+		std::cout << str_ << std::endl;
+	}
+private:
+	std::string str_;
+};
+
+
+std::string
+test3(std::string input){
+	std::string result
+	= sc::switch_(input)
+		|=sc::case_(std::string("yes"))
+		|=sc::case_(std::string("y"))
+		|=sc::case_(std::string("Y"))|sc::var(std::string("ok"))
+		|=sc::default_|sc::var(std::string("error"));
+	return result;
+}
+
 void
 test(){
-	using sc::var;
-	using sc::switch_;
 	using sc::case_;
-	hoge(case_(0)|=case_(1)|var(1) );
+	sc::switch_(2)
+		|=case_(0)
+		|=case_(1)|disp("test")
+		|=case_(2)|disp("test2");
+	
 //	switch_(0)|=case_(0)|=case_(1)|=case_(2);
 /*
 	int n = switch_(0)
@@ -61,6 +86,8 @@ test(){
 		|=case_(3)&0;
 	std::cout << n << std::endl;
 */
+	std::cout << test3("yes") << std::endl;
+	std::cout << test3("no") << std::endl;
 }
 
 #if 0
@@ -106,20 +133,6 @@ fizz_buzz_disp(int n){
 		|=sc::case_expr(0,_, std::cout << constant(std::string("fizz")) << "\n")
 		|=sc::case_expr(_,0, std::cout << constant(std::string("buzz")) << "\n")
 		|=sc::default_expr(std::cout << constant(boost::lexical_cast<std::string>(n)) << "\n");
-}
-
-void
-test3(){
-	
-	std::string input = "yes";
-	std::string result
-	= sc::switch_(input)
-		|=sc::case_(std::string("yes"))
-		|=sc::case_(std::string("y"))
-		|=sc::case_(std::string("Y"))|sc::var(std::string("ok"))
-		|=sc::default_&std::string("error");
-	std::cout << result << std::endl;
-
 }
 
 void

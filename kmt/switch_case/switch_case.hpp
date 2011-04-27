@@ -21,8 +21,11 @@
 #include <boost/utility/result_of.hpp>
 #include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/apply.hpp>
-#include "exception.hpp"
+#include <boost/type_traits/is_base_of.hpp>
+#include <boost/mpl/bool.hpp>
+#include <boost/mpl/has_xxx.hpp>
 
+#include "exception.hpp"
 
 namespace kmt{ namespace switch_case{
 
@@ -49,6 +52,219 @@ template<typename T, typename U>
 bool equal(const T& t, const U& u){
 	return t == u;
 }
+
+template<typename T>
+struct equal_value{
+	typedef T value_type;
+	equal_value(value_type const& value) : value_(value){}
+	
+	template<typename U>
+	bool operator ()(U const& u) const{
+		return detail::equal(value_, u);
+	}
+	T value_;
+};
+
+template<typename T>
+struct equal_type{
+	typedef T value_type;
+	
+	template<typename U>
+	bool operator ()(U const&) const{
+		return boost::is_same<value_type, U>();
+	}
+};
+
+
+BOOST_MPL_HAS_XXX_TRAIT_DEF(expr_type);
+
+template<typename T>
+struct is_fall_through
+	: boost::mpl::not_<has_expr_type<T> >{};
+
+
+template<typename Pred>
+struct case_impl{
+	typedef Pred pred_type;
+	typedef void result_type;
+	
+	case_impl(pred_type const& pred)
+		: pred_(pred){}
+	
+	template<typename T>
+	bool equal(T const& t) const{
+		return pred_(t);
+	}
+	
+	result_type
+	operator ()(){}
+	
+	template<typename T>
+	result_type
+	visit(T const& src){}
+private:
+	pred_type pred_;
+};
+
+template<typename caseT, typename ExprT>
+struct case_expr : caseT{
+	typedef caseT case_type;
+	typedef case_type base_type;
+	typedef ExprT expr_type;
+	typedef typename expr_type::result_type  result_type;
+	
+	case_expr(case_type const& case_, expr_type expr)
+		: base_type(case_), expr_(expr){}
+	
+	result_type
+	operator ()(){
+		return expr_();
+	}
+	
+	template<typename T>
+	result_type
+	visit(T const& src){
+		if( base_type::equal(src) ) return (*this)();
+		else throw(no_match("!exception! : no match switch case"));
+	}
+private:
+	expr_type expr_;
+};
+
+template<typename caseT, typename exprT>
+case_expr<caseT, exprT>
+operator |(caseT const& case_, exprT expr){
+	return case_expr<caseT, exprT>(case_, expr);
+}
+
+
+template<typename caseT, typename nextT = empty_case>
+struct case_next
+	: caseT{
+	typedef caseT case_type;
+	typedef case_type base_type;
+	typedef nextT next_type;
+	typedef typename next_type::result_type result_type;
+	
+	case_next(case_type const& case_, next_type next = empty_case())
+		: base_type(case_), next_(next){}
+	
+	result_type
+	operator ()(){
+		return eval<case_type>();
+	}
+	
+	template<typename U>
+	result_type
+	eval(typename boost::enable_if<is_fall_through<U> >::type* =0){
+		return next_();
+	}
+	
+	template<typename U>
+	result_type
+	eval(typename boost::disable_if<is_fall_through<U> >::type* =0){
+		return static_cast<case_type&>(*this)();
+	}
+	
+	template<typename T>
+	result_type
+	visit(T const& src){
+		return ( base_type::equal(src) ) ? (*this)() : next_.visit(src);
+	}
+private:
+	next_type next_;
+};
+
+template<typename caseT, typename nextT>
+typename boost::enable_if_c<
+	boost::is_base_of<case_impl<typename caseT::pred_type>, caseT>::value,
+	case_next<caseT, nextT>
+>::type
+operator |=(caseT const& case_, nextT const& next){
+	return case_next<caseT, nextT>(case_, next);
+}
+
+//----------------------------------------------------------
+// switch_t
+template<typename T>
+struct switch_t{
+	typedef T value_type;
+	
+	explicit switch_t(const T& value_)
+		: value(value_){}
+	
+	template<typename case_t>
+	typename case_t::result_type
+	operator |=(case_t case_) const{
+		return case_.visit(value);
+	}
+
+private:
+	value_type value;
+};
+
+
+// "*" の代わり
+struct true_{}_;
+template<typename T>
+bool operator ==(const true_&, const T&){
+	return true;
+}
+
+template<typename T>
+struct functionable_holder{
+	typedef T result_type;
+	
+	explicit functionable_holder(T t) : value(t){}
+
+	result_type
+	operator ()(){
+		return value;
+	}
+	result_type
+	operator ()() const{
+		return value;
+	}
+private:
+	T value;
+};
+
+static const detail::case_impl<equal_value<detail::true_> > default_(_);
+
+}  // namespace detail
+
+
+using detail::_;
+using detail::default_;
+
+
+template<typename T>
+detail::functionable_holder<T&>
+var(T& t){
+	return detail::functionable_holder<T&>(t);
+}
+
+template<typename T>
+detail::functionable_holder<T const&>
+var(T const& t){
+	return detail::functionable_holder<T const&>(t);
+}
+
+template<typename T>
+detail::switch_t<T>
+switch_(const T& t){
+	return detail::switch_t<T>(t);
+}
+
+template<typename T>
+detail::case_impl<detail::equal_value<T> >
+case_(T const& t){
+	return detail::case_impl<detail::equal_value<T> >(detail::equal_value<T>(t));
+}
+
+
+#if 0
+namespace detail{
 
 template<typename T, typename C, typename N>
 typename result_type<C>::type
@@ -227,7 +443,6 @@ private:
 	expression_type expression_;
 };
 
-
 template<typename T, typename next_type, typename F>
 case_expression_impl<case_impl<T, next_type>, eval_impl<F&> >
 operator |(case_impl<T, next_type> const& case_, F& f){
@@ -256,84 +471,9 @@ operator &(case_impl<T, next_type> const& case_, U const& value){
 	return case_expression_impl<case_impl<T, next_type>, value_impl<U const&> >
 		(case_, value_impl<U const&>(value));
 }
+#endif
 
-
-//----------------------------------------------------------
-// switch_t
-template<typename T>
-struct switch_t{
-	typedef T value_type;
-	
-	explicit switch_t(const T& value_)
-		: value(value_){}
-	
-	template<typename case_t>
-	typename case_t::result_type
-	operator |=(case_t case_) const{
-		return case_.visit(value);
-	}
-private:
-	value_type value;
-};
-
-
-// "*" の代わり
-struct true_{
-	template<typename T>
-	bool equal(T) const{
-		return true;
-	}
-}_;
-template<typename T>
-bool operator ==(const true_&, const T&){
-	return true;
-}
-
-template<typename T>
-struct functionable_holder{
-	typedef T result_type;
-	
-	explicit functionable_holder(T t) : value(t){}
-
-	result_type
-	operator ()(){
-		return value;
-	}
-	result_type
-	operator ()() const{
-		return value;
-	}
-private:
-	T value;
-};
-
-static const detail::case_impl<detail::true_> default_(_);
-
-}  // namespace detail
-
-
-using detail::_;
-using detail::default_;
-
-
-template<typename T>
-detail::functionable_holder<T&>
-var(T& t){
-	return detail::functionable_holder<T&>(t);
-}
-
-template<typename T>
-detail::functionable_holder<T const&>
-var(T const& t){
-	return detail::functionable_holder<T const&>(t);
-}
-
-template<typename T>
-detail::switch_t<T>
-switch_(const T& t){
-	return detail::switch_t<T>(t);
-}
-
+#if 0
 template<typename T>
 detail::case_impl<detail::case_value<T> >
 case_(const T& t){
@@ -367,10 +507,11 @@ detail::case_impl<detail::case_value<boost::tuple<T1, T2> > >
 case_(const T1& t1, const T2& t2){
 	return case_( boost::make_tuple(t1, t2) );
 }
-
+#endif
 
 //----------------------------------------------------------
 // expr
+#if 0
 template<typename T, typename F>
 detail::case_expression_impl<
 	detail::case_impl<detail::case_value<T> >,
@@ -431,7 +572,7 @@ detail::case_expression_impl<
 case_expr(const T1& t1, const T2& t2, F const& f){
 	return case_expr( boost::make_tuple(t1, t2), f);
 }
-
+#endif
 
 }  // namespace switch_case
 }  // namespace kmt
