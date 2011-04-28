@@ -39,22 +39,11 @@ struct result_of<F&> : result_of<F>{};
 template<typename F>
 struct result_of<F const&> : result_of<F>{};
 
-template<typename T>
-struct equal_value{
-	typedef T value_type;
-	equal_value(value_type const& value) : value_(value){}
-	
-	template<typename U>
-	bool operator ()(U const& u) const{
-		return value_ == u;
-	}
-private:
-	T value_;
-};
 
 BOOST_MPL_HAS_XXX_TRAIT_DEF(expr_type);
 template<typename T>
 struct is_fall_through : boost::mpl::not_<has_expr_type<T> >{};
+
 
 template<typename Pred>
 struct case_impl{
@@ -70,11 +59,11 @@ struct case_impl{
 	}
 	
 	result_type
-	operator ()() const{};
+	eval() const{}
 	
 	template<typename T>
 	result_type
-	visit(T const& src){}
+	operator ()(T const& src){}
 private:
 	pred_type pred_;
 };
@@ -90,24 +79,18 @@ struct case_expr : caseT{
 		: base_type(case_), expr_(expr){}
 	
 	result_type
-	operator ()(){
-		static_cast<base_type>(*this)();
+	eval(){
+		static_cast<base_type>(*this).eval();
 		return expr_();
 	}
 	
 	template<typename T>
 	result_type
-	visit(T const& src){
-		return eval(src);
+	operator ()(T const& src){
+		return ( base_type::equal(src) ) ? eval() : no_match<result_type>();
 	}
 	
 private:
-	template<typename T>
-	result_type
-	eval(T const& src){
-		return ( base_type::equal(src) ) ? (*this)() : no_match<result_type>();
-	}
-	
 	// 戻り値型が void 以外の場合のみ例外を飛ばす
 	template<typename T>
 	result_type
@@ -146,27 +129,27 @@ struct case_next
 		: base_type(case_), next_(next){}
 	
 	result_type
-	operator ()(){
-		return eval<case_type>();
+	eval(){
+		return apply<case_type>();
 	}
 	
 	template<typename T>
 	result_type
-	visit(T const& src){
-		return ( base_type::equal(src) ) ? (*this)() : next_.visit(src);
+	operator ()(T const& src){
+		return ( base_type::equal(src) ) ? eval() : next_(src);
 	}
 	
 private:
 	template<typename U>
 	result_type
-	eval(typename boost::enable_if<is_fall_through<U> >::type* =0){
-		return next_();
+	apply(typename boost::enable_if<is_fall_through<U> >::type* =0){
+		return next_.eval();
 	}
 	
 	template<typename U>
 	result_type
-	eval(typename boost::disable_if<is_fall_through<U> >::type* =0){
-		return static_cast<base_type&>(*this)();
+	apply(typename boost::disable_if<is_fall_through<U> >::type* =0){
+		return base_type::eval();
 	}
 	
 	next_type next_;
@@ -180,6 +163,19 @@ typename boost::enable_if_c<
 operator |=(caseT const& case_, nextT const& next){
 	return case_next<caseT, nextT>(case_, next);
 }
+
+template<typename T>
+struct equal_value{
+	typedef T value_type;
+	equal_value(value_type const& value) : value_(value){}
+	
+	template<typename U>
+	bool operator ()(U const& u) const{
+		return value_ == u;
+	}
+private:
+	T value_;
+};
 
 }  // namespace detail{
 

@@ -19,27 +19,27 @@ namespace kmt{ namespace switch_case{
 namespace detail{
 
 template<typename T>
-struct switch_t{
+struct switch_impl{
 	typedef T value_type;
 	
-	explicit switch_t(const T& value_)
-		: value(value_){}
+	explicit switch_impl(const T& value)
+		: value_(value){}
 	
 	template<typename case_t>
 	typename case_t::result_type
 	operator |=(case_t case_) const{
-		return case_.visit(value);
+		return case_(value_);
 	}
 private:
-	value_type value;
+	value_type value_;
 };
 
 }  // namespace detail
 
 template<typename T>
-detail::switch_t<T>
-switch_(const T& t){
-	return detail::switch_t<T>(t);
+detail::switch_impl<T>
+switch_(T const& t){
+	return detail::switch_impl<T>(t);
 }
 
 

@@ -81,7 +81,6 @@ void
 fizz_buzz(int n){
 	using sc::_;
 	using boost::fusion::make_vector;
-	using boost::fusion::make_fused;
 	using boost::lambda::_1;
 	using boost::lambda::_2;
 	
@@ -99,13 +98,17 @@ test4(boost::variant<int, float, char, std::string> var){
 	sc::switch_(var)
 		|=sc::case_variant<int>()  |disp("int")
 		|=sc::case_variant<float>()|disp("float")
-		|=sc::case_variant<char>() |disp("char")
 		|=sc::default_|disp("other type");
 }
 
 
 void
-test(){
+test5(){
+	sc::switch_<int>(10);
+}
+
+void
+run(){
 	using sc::case_;
 	sc::switch_(1)
 		|=case_(0)
@@ -140,79 +143,9 @@ test(){
 
 }
 
-#if 0
-template<typename T>
-void
-test2(const T& t){
-	using sc::var;
-	using sc::switch_;
-	using sc::case_;
-	using sc::default_;
-	std::string result;
-	result = switch_(t)
-		|=case_<std::string>()&std::string("string")
-		|=case_<int>()&std::string("int")
-		|=default_&std::string("no match");
-	std::cout << result << std::endl;
-}
-
-
-void
-fizz_buzz(int n){
-	using sc::_;
-	
-	std::string result
-	= sc::switch_(n%3, n%5)
-		|=sc::case_(0,0)|sc::var(std::string("fizz_buzz"))
-		|=sc::case_(0,_)|sc::var(std::string("fizz"))
-		|=sc::case_(_,0)&(std::string("buzz"))
-		|=sc::default_&(boost::lexical_cast<std::string>(n));
-	std::cout << result << std::endl;
-}
-
-
-#include <boost/lambda/lambda.hpp>
-
-void
-fizz_buzz_disp(int n){
-	using boost::lambda::constant;
-	using sc::_;
-
-	sc::switch_(n%3, n%5)
-		|=sc::case_expr(0,0, std::cout << constant(std::string("fizz_buzz")) << "\n")
-		|=sc::case_expr(0,_, std::cout << constant(std::string("fizz")) << "\n")
-		|=sc::case_expr(_,0, std::cout << constant(std::string("buzz")) << "\n")
-		|=sc::default_expr(std::cout << constant(boost::lexical_cast<std::string>(n)) << "\n");
-}
-
-void
-run(){
-		test();
-	test2(std::string(""));
-	test2(0);
-	test2(0.0f);
-	std::string hoge;
-	test2(hoge);
-	tese3();
-	
-	for(int i = 1 ; i < 20 ; ++i){
-		fizz_buzz(i);
-		fizz_buzz_disp(i);
-	}
-	try{
-		sc::switch_(0)
-			|=sc::case_(1)&10;
-	}
-	catch(std::exception& exp){
-		std::cout << exp.what() << std::endl;
-	}
-}
-#endif
-
 int
 main(){
-	test();
-//	run();
+	run();
 	
 	return 0;
 }
