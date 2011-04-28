@@ -16,7 +16,6 @@
 
 namespace kmt{ namespace switch_case{
 
-
 namespace detail{
 
 template<typename T>
@@ -50,8 +49,6 @@ detail::functionable_holder<T const&>
 var(T const& t){
 	return detail::functionable_holder<T const&>(t);
 }
-
-
 
 } } // namespace kmt{ namespace switch_case{
 

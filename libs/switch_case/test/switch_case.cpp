@@ -2,10 +2,12 @@
 #include <kmt/switch_case/include/case_fused.hpp>
 #include <kmt/switch_case/include/case_type.hpp>
 #include <kmt/switch_case/include/var.hpp>
+#include <kmt/switch_case/include/case_variant.hpp>
 
 #include <iostream>
 #include <string>
 
+#include <boost/variant/variant.hpp>
 #include <boost/lambda/lambda.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/fusion/include/make_vector.hpp>
@@ -44,13 +46,6 @@ struct result<sc::detail::empty_case, Seq>{
 };
 */
 
-template<typename T>
-void
-hoge(T t){
-	using boost::mpl::print;
-///	typedef typename print<T>::type Ttype;
-}
-
 struct disp{
 	typedef void result_type;
 	disp(std::string str) : str_(str){}
@@ -65,9 +60,9 @@ template<typename T>
 void
 test2(T t){
 	sc::switch_(t)
-		|=sc::case_type<int>()|disp("int")
+		|=sc::case_type<int>()        |disp("int")
 		|=sc::case_type<std::string>()|disp("string")
-		|=sc::case_type<float>()|disp("float")
+		|=sc::case_type<float>()      |disp("float")
 		|=sc::default_|disp("other type");
 }
 
@@ -100,6 +95,16 @@ fizz_buzz(int n){
 }
 
 void
+test4(boost::variant<int, float, char, std::string> var){
+	sc::switch_(var)
+		|=sc::case_variant<int>()  |disp("int")
+		|=sc::case_variant<float>()|disp("float")
+		|=sc::case_variant<char>() |disp("char")
+		|=sc::default_|disp("other type");
+}
+
+
+void
 test(){
 	using sc::case_;
 	sc::switch_(1)
@@ -127,6 +132,12 @@ test(){
 	for(int i = 1 ; i < 20 ; ++i){
 		fizz_buzz(i);
 	}
+	
+	test4('c');
+	test4(10);
+	test4(3.14f);
+	test4(std::string("hogehoge"));
+
 }
 
 #if 0

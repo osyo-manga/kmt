@@ -16,12 +16,11 @@
 
 #include <boost/utility/enable_if.hpp>
 #include <boost/utility/result_of.hpp>
-#include <boost/mpl/apply.hpp>
+#include <boost/mpl/not.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/has_xxx.hpp>
 #include <boost/type_traits/is_void.hpp>
 #include <boost/type_traits/is_base_of.hpp>
-#include <boost/bind.hpp>
 
 #include "exception.hpp"
 
@@ -40,11 +39,6 @@ struct result_of<F&> : result_of<F>{};
 template<typename F>
 struct result_of<F const&> : result_of<F>{};
 
-template<typename T, typename U>
-bool equal(const T& t, const U& u){
-	return t == u;
-}
-
 template<typename T>
 struct equal_value{
 	typedef T value_type;
@@ -52,15 +46,15 @@ struct equal_value{
 	
 	template<typename U>
 	bool operator ()(U const& u) const{
-		return detail::equal(value_, u);
+		return value_ == u;
 	}
+private:
 	T value_;
 };
 
 BOOST_MPL_HAS_XXX_TRAIT_DEF(expr_type);
 template<typename T>
 struct is_fall_through : boost::mpl::not_<has_expr_type<T> >{};
-
 
 template<typename Pred>
 struct case_impl{
