@@ -11,8 +11,8 @@
 // Boost Software License - Version 1.0
 // <http://www.boost.org/LICENSE_1_0.txt>
 //
-#ifndef KMT_SWITCH_CASE_EXCEPTION_H
-#define KMT_SWITCH_CASE_EXCEPTION_H
+#ifndef KMT_SWITCH_CASE_INCLUDE_EXCEPTION_H
+#define KMT_SWITCH_CASE_INCLUDE_EXCEPTION_H
 
 #include <stdexcept>
 
@@ -24,4 +24,4 @@ struct no_match : std::runtime_error{
 
 } } // namespace kmt{ namespace switch_case {
 
-#endif /* KMT_SWITCH_CASE_EXCEPTION_H */
+#endif /* KMT_SWITCH_CASE_INCLUDE_EXCEPTION_H */

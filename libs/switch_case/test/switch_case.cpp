@@ -1,14 +1,22 @@
-#include <iostream>
-#include <boost/tuple/tuple_io.hpp>
-#include <kmt/switch_case.hpp>
+#include <kmt/switch_case/include/switch_case.hpp>
+#include <kmt/switch_case/include/case_fused.hpp>
+#include <kmt/switch_case/include/case_type.hpp>
+#include <kmt/switch_case/include/var.hpp>
 
-#include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <string>
 
+#include <boost/lambda/lambda.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/fusion/include/make_vector.hpp>
+#include <boost/fusion/include/make_fused.hpp>
+
+namespace sc = kmt::switch_case;
+
+/*
+
 #include <boost/mpl/print.hpp>
 #include <boost/variant.hpp>
-
 #include <boost/mpl/print.hpp>
 #include <boost/variant.hpp>
 #include <boost/mpl/push_back.hpp>
@@ -17,10 +25,6 @@
 #include <boost/mpl/remove.hpp>
 #include <boost/mpl/vector.hpp>
 
-
-namespace sc = kmt::switch_case;
-
-/*
 template<typename T, typename Seq = boost::mpl::vector<> >
 struct result{
 	typedef typename boost::mpl::push_back<
@@ -78,6 +82,22 @@ test3(std::string input){
 	return result;
 }
 
+void
+fizz_buzz(int n){
+	using sc::_;
+	using boost::fusion::make_vector;
+	using boost::fusion::make_fused;
+	using boost::lambda::_1;
+	using boost::lambda::_2;
+	
+	std::string result
+	= sc::switch_(make_vector(n%3, n%5))
+		|=sc::case_fused(_1 == 0 && _2 == 0)|sc::var(std::string("fizz_buzz"))
+		|=sc::case_fused(_1 == 0)           |sc::var(std::string("fizz"))
+		|=sc::case_fused(_2 == 0)           |sc::var(std::string("buzz"))
+		|=sc::default_|sc::var(boost::lexical_cast<std::string>(n));
+	std::cout << result << std::endl;
+}
 
 void
 test(){
@@ -96,20 +116,17 @@ test(){
 	catch(std::exception& exp){
 		std::cout << "exp :" << exp.what() << std::endl;
 	}
-/*
-	int n = switch_(0)
-		|=case_(0)
-		|=case_(1)|var(1)
-		|=case_(2)
-		|=case_(3)&0;
-	std::cout << n << std::endl;
-*/
+
 	std::cout << test3("yes") << std::endl;
 	std::cout << test3("no") << std::endl;
 	test2(10);
 	test2(3.14f);
 	test2(std::string("hoge"));
 	test2(long(10));
+	
+	for(int i = 1 ; i < 20 ; ++i){
+		fizz_buzz(i);
+	}
 }
 
 #if 0

@@ -11,10 +11,13 @@
 // Boost Software License - Version 1.0
 // <http://www.boost.org/LICENSE_1_0.txt>
 //
-#ifndef KMT_SWITCH_CASE_H
-#define KMT_SWITCH_CASE_H
+#ifndef KMT_SWITCH_CASE_INCLUDE_SWITCH_CASE_H
+#define KMT_SWITCH_CASE_INCLUDE_SWITCH_CASE_H
 
-#include "switch_case/include/switch_case.hpp"
+#include "switch.hpp"
+#include "case.hpp"
+#include "default.hpp"
 
-#endif // #ifdef KMT_SWITCH_CASE_H
+#endif // #ifdef KMT_SWITCH_CASE_INCLUDE_SWITCH_CASE_H
+
 
