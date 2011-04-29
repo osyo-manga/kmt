@@ -36,8 +36,8 @@ test_main(int argc, char* argv[]){
 	kmt::initialized<test1> t1;
 	kmt::initialized<test2> t2;
 	
-	BOOST_CHECK(t1 == 10);
-	BOOST_CHECK(t2 == 0.25f);
+	BOOST_CHECK(t1.data() == 10);
+	BOOST_CHECK(t2.data() == 0.25f);
 	
 	return 0;
 }
