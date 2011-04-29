@@ -24,6 +24,8 @@ namespace detail{
 
 namespace mpl = boost::mpl;
 
+struct initializer_empty{};
+
 template<typename T, typename Initializer, typename sfinae = void>
 struct initialized_impl : boost::initialized<T>{
 	typedef boost::initialized<T> base_type;
@@ -32,10 +34,12 @@ struct initialized_impl : boost::initialized<T>{
 };
 
 
-// Initializer が void 以外の場合
+// Initializer が initializer_empty 以外の場合
 template<typename T, typename Initializer>
 struct initialized_impl<T, Initializer, 
-	typename boost::disable_if< boost::is_void<Initializer> >::type >
+	typename boost::disable_if<
+		boost::is_same<initializer_empty, Initializer> >::type
+	>
 	: boost::initialized<T>{
 	typedef boost::initialized<T> base_type;
 	initialized_impl() : 
@@ -46,7 +50,7 @@ struct initialized_impl<T, Initializer,
 
 BOOST_MPL_HAS_XXX_TRAIT_DEF(value_type);
 
-// T::value_type があり、Initializer が void の場合
+// T::value_type があり、Initializer が initializer_empty の場合
 template<typename T>
 struct initialized_impl<T, void, typename boost::enable_if<has_value_type<T> >::type >
 	: boost::initialized<typename T::value_type>{
@@ -59,7 +63,7 @@ struct initialized_impl<T, void, typename boost::enable_if<has_value_type<T> >::
 }  // namespace detail
 
 
-template<typename T, typename Initializer = void>
+template<typename T, typename Initializer = detail::initializer_empty>
 struct initialized : detail::initialized_impl<T, Initializer>{
 	typedef detail::initialized_impl<T, Initializer> base_type;
 	initialized() : base_type(){}
