@@ -61,6 +61,9 @@ struct case_impl{
 	result_type
 	eval() const{}
 	
+	template<typename R, typename T>
+	R operator ()(T const& src){}
+	
 	template<typename T>
 	result_type
 	operator ()(T const& src){}
@@ -82,6 +85,12 @@ struct case_expr : caseT{
 	eval(){
 		static_cast<base_type>(*this).eval();
 		return expr_();
+	}
+	
+	template<typename R, typename T>
+	R
+	operator ()(T const& src){
+		return static_cast<R>(( base_type::equal(src) ) ? eval() : no_match<R>());
 	}
 	
 	template<typename T>
@@ -123,7 +132,15 @@ struct case_next
 	typedef caseT case_type;
 	typedef case_type base_type;
 	typedef nextT next_type;
-	typedef typename next_type::result_type result_type;
+	
+	// fall through の有無で戻り値型を変える
+	typedef typename 
+		mpl::if_<
+			is_fall_through<case_type>,
+			typename next_type::result_type,
+			typename base_type::result_type
+		>::type
+	result_type;
 	
 	case_next(case_type const& case_, next_type next)
 		: base_type(case_), next_(next){}
@@ -139,15 +156,19 @@ struct case_next
 		return ( base_type::equal(src) ) ? eval() : next_(src);
 	}
 	
+	next_type next(){
+		return next_;
+	}
+	
 private:
 	template<typename U>
-	result_type
+	typename next_type::result_type
 	apply(typename boost::enable_if<is_fall_through<U> >::type* =0){
 		return next_.eval();
 	}
 	
 	template<typename U>
-	result_type
+	typename base_type::result_type
 	apply(typename boost::disable_if<is_fall_through<U> >::type* =0){
 		return base_type::eval();
 	}

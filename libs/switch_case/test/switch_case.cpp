@@ -3,6 +3,7 @@
 #include <kmt/switch_case/include/case_type.hpp>
 #include <kmt/switch_case/include/var.hpp>
 #include <kmt/switch_case/include/case_variant.hpp>
+#include <kmt/switch_case/include/returnable_switch.hpp>
 
 #include <iostream>
 #include <string>
@@ -16,7 +17,6 @@
 namespace sc = kmt::switch_case;
 
 /*
-
 #include <boost/mpl/print.hpp>
 #include <boost/variant.hpp>
 #include <boost/mpl/print.hpp>
@@ -48,7 +48,7 @@ struct result<sc::detail::empty_case, Seq>{
 
 struct disp{
 	typedef void result_type;
-	disp(std::string str) : str_(str){}
+	disp(std::string const& str) : str_(str){}
 	void operator()() const{
 		std::cout << str_ << std::endl;
 	}
@@ -77,6 +77,7 @@ test3(std::string input){
 	return result;
 }
 
+
 void
 fizz_buzz(int n){
 	using sc::_;
@@ -84,12 +85,13 @@ fizz_buzz(int n){
 	using boost::lambda::_1;
 	using boost::lambda::_2;
 	
-	std::string result
-	= sc::switch_(make_vector(n%3, n%5))
+	boost::variant<int, std::string> result
+	= sc::returnable_switch<boost::variant<int, std::string>>(make_vector(n%3, n%5))
 		|=sc::case_fused(_1 == 0 && _2 == 0)|sc::var(std::string("fizz_buzz"))
 		|=sc::case_fused(_1 == 0)           |sc::var(std::string("fizz"))
 		|=sc::case_fused(_2 == 0)           |sc::var(std::string("buzz"))
-		|=sc::default_|sc::var(boost::lexical_cast<std::string>(n));
+		|=sc::default_|sc::var(n);
+//		|=sc::default_|sc::var(boost::lexical_cast<std::string>(n));
 	std::cout << result << std::endl;
 }
 
@@ -101,10 +103,12 @@ test4(boost::variant<int, float, char, std::string> var){
 		|=sc::default_|disp("other type");
 }
 
-
 void
 test5(){
-	sc::switch_<int>(10);
+	auto v = sc::returnable_switch<boost::variant<int, std::string> >(20)
+		|=sc::case_(10)|sc::var(10)
+		|=sc::case_(20)|sc::var(std::string("hoge"));
+	std::cout << v << std::endl;
 }
 
 void
@@ -140,6 +144,8 @@ run(){
 	test4(10);
 	test4(3.14f);
 	test4(std::string("hogehoge"));
+	
+	test5();
 
 }
 

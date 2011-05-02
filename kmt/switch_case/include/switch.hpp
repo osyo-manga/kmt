@@ -30,6 +30,7 @@ struct switch_impl{
 	operator |=(case_t case_) const{
 		return case_(value_);
 	}
+	
 private:
 	value_type value_;
 };
