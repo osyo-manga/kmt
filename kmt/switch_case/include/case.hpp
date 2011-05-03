@@ -39,6 +39,16 @@ struct result_of<F&> : result_of<F>{};
 template<typename F>
 struct result_of<F const&> : result_of<F>{};
 
+// 戻り値型が void 以外の場合のみ例外を飛ばす
+template<typename T>
+T
+no_match(typename boost::disable_if<boost::is_void<T> >::type* =0){
+	throw(switch_case::no_match("!exception! : no match switch case"));
+}
+template<typename T>
+T
+no_match(typename boost::enable_if<boost::is_void<T> >::type* =0){}
+
 
 BOOST_MPL_HAS_XXX_TRAIT_DEF(expr_type);
 template<typename T>
@@ -100,16 +110,6 @@ struct case_expr : caseT{
 	}
 	
 private:
-	// 戻り値型が void 以外の場合のみ例外を飛ばす
-	template<typename T>
-	result_type
-	no_match(typename boost::disable_if<boost::is_void<T> >::type* =0){
-		throw(switch_case::no_match("!exception! : no match switch case"));
-	}
-	template<typename T>
-	result_type
-	no_match(typename boost::enable_if<boost::is_void<T> >::type* =0){}
-	
 	expr_type expr_;
 };
 

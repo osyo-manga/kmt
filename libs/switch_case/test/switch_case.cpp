@@ -86,12 +86,11 @@ fizz_buzz(int n){
 	using boost::lambda::_2;
 	
 	boost::variant<int, std::string> result
-	= sc::returnable_switch<boost::variant<int, std::string>>(make_vector(n%3, n%5))
+	= sc::returnable_switch<boost::variant<int, std::string> >(make_vector(n%3, n%5))
 		|=sc::case_fused(_1 == 0 && _2 == 0)|sc::var(std::string("fizz_buzz"))
 		|=sc::case_fused(_1 == 0)           |sc::var(std::string("fizz"))
 		|=sc::case_fused(_2 == 0)           |sc::var(std::string("buzz"))
 		|=sc::default_|sc::var(n);
-//		|=sc::default_|sc::var(boost::lexical_cast<std::string>(n));
 	std::cout << result << std::endl;
 }
 
@@ -105,7 +104,8 @@ test4(boost::variant<int, float, char, std::string> var){
 
 void
 test5(){
-	auto v = sc::returnable_switch<boost::variant<int, std::string> >(20)
+	boost::variant<int, std::string> v
+	= sc::returnable_switch<boost::variant<int, std::string> >(20)
 		|=sc::case_(10)|sc::var(10)
 		|=sc::case_(20)|sc::var(std::string("hoge"));
 	std::cout << v << std::endl;
