@@ -35,8 +35,6 @@ struct returnable_switch_impl{
 	operator |=(case_t case_) const{
 		return eval(case_);
 	}
-	
-private:
 	// 次の case の有無で処理を切り分ける
 	template<typename case_t>
 	result_type
@@ -54,6 +52,7 @@ private:
 		return (case_.equal(value_)) ? eval_next(case_) : eval(case_.next());
 	}
 	
+private:
 	// fall through の有無で処理を切り分ける
 	template<typename case_t>
 	result_type
