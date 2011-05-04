@@ -20,6 +20,25 @@
 
 #include <iostream>
 
+/*
+[output]
+-5:is minus
+-4:is minus
+-3:is minus
+-2:is minus
+-1:is minus
+0:is even
+1:is odd
+2:is even
+3:is odd
+4:is even
+5:is odd
+6:is even
+7:is odd
+8:is even
+9:is odd
+*/
+
 int
 main(){
 	
