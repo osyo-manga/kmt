@@ -19,6 +19,7 @@
 #include <boost/mpl/not.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/has_xxx.hpp>
+#include <boost/mpl/eval_if.hpp>
 #include <boost/type_traits/is_void.hpp>
 #include <boost/type_traits/is_base_of.hpp>
 
@@ -30,14 +31,14 @@ namespace detail{
 
 namespace mpl = boost::mpl;
 
-template<typename F>
-struct result_of : boost::result_of<F()>{};
+template<typename F, typename Arg = void>
+struct result_of : boost::result_of<F(Arg)>{};
 
-template<typename F>
-struct result_of<F&> : result_of<F>{};
+template<typename F, typename Arg>
+struct result_of<F&, Arg> : result_of<F, Arg>{};
 
-template<typename F>
-struct result_of<F const&> : result_of<F>{};
+template<typename F, typename Arg>
+struct result_of<F const&, Arg> : result_of<F, Arg>{};
 
 // 戻り値型が void 以外の場合のみ例外を飛ばす
 template<typename T>
@@ -58,7 +59,11 @@ struct is_fall_through : boost::mpl::not_<has_expr_type<T> >{};
 template<typename Pred>
 struct case_impl{
 	typedef Pred pred_type;
-	typedef void result_type;
+	
+	template<typename T>
+	struct result{
+		typedef void type;
+	};
 	
 	case_impl(pred_type const& pred)
 		: pred_(pred){}
@@ -68,92 +73,88 @@ struct case_impl{
 		return pred_(t);
 	}
 	
-	result_type
-	eval() const{}
-	
-	template<typename R, typename T>
-	R operator ()(T const& src){}
+	template<typename T>
+	void
+	eval(T const&) const{}
 	
 	template<typename T>
-	result_type
+	void
+	operator ()(T const& src) const{}
+	
+	template<typename T>
+	void
 	operator ()(T const& src){}
 private:
 	pred_type pred_;
 };
 
+
 template<typename caseT, typename ExprT>
 struct case_expr : caseT{
-	typedef caseT case_type;
+	typedef case_expr this_type;
+	typedef caseT     case_type;
 	typedef case_type base_type;
-	typedef ExprT expr_type;
-	typedef typename result_of<expr_type>::type result_type;
+	typedef ExprT     expr_type;
+	
+	template<typename T>
+	struct result{
+		typedef typename result_of<expr_type>::type type;
+	};
 	
 	case_expr(case_type const& case_, expr_type expr)
 		: base_type(case_), expr_(expr){}
 	
-	result_type
-	eval(){
-		static_cast<base_type>(*this).eval();
-		return expr_();
-	}
-	
-	template<typename R, typename T>
-	R
-	operator ()(T const& src){
-		return static_cast<R>(( base_type::equal(src) ) ? eval() : no_match<R>());
+	template<typename T>
+	typename result_of<this_type, T>::type
+	eval(T const& src){
+		static_cast<base_type>(*this).eval(src);
+		return static_cast<typename result_of<this_type, T>::type>(expr_(src));
 	}
 	
 	template<typename T>
-	result_type
+	typename result_of<this_type, T>::type
 	operator ()(T const& src){
-		return ( base_type::equal(src) ) ? eval() : no_match<result_type>();
+		return ( base_type::equal(src) ) ? eval(src) : no_match<typename result<T>::type>();
 	}
 	
 private:
 	expr_type expr_;
 };
 
-template<typename caseT, typename exprT>
-case_expr<caseT, exprT&>
-operator |(caseT const& case_, exprT& expr){
-	return case_expr<caseT, exprT&>(case_, expr);
-}
-
-template<typename caseT, typename exprT>
-case_expr<caseT, exprT const&>
-operator |(caseT const& case_, exprT const& expr){
-	return case_expr<caseT, exprT const&>(case_, expr);
-}
-
 
 template<typename caseT, typename nextT>
 struct case_next
 	: caseT{
-	typedef caseT case_type;
+	typedef caseT     case_type;
 	typedef case_type base_type;
-	typedef nextT next_type;
+	typedef case_next this_type;
+	typedef nextT     next_type;
 	
 	// fall through の有無で戻り値型を変える
-	typedef typename 
-		mpl::if_<
-			is_fall_through<case_type>,
-			typename next_type::result_type,
-			typename base_type::result_type
-		>::type
-	result_type;
+	template<typename T>
+	struct result{
+		typedef typename
+			mpl::eval_if<
+				is_fall_through<case_type>,
+				result_of<next_type, T>,
+				result_of<base_type, T>
+			>::type
+		type;
+	};
 	
 	case_next(case_type const& case_, next_type next)
 		: base_type(case_), next_(next){}
 	
-	result_type
-	eval(){
-		return apply<case_type>();
+	template<typename T>
+	typename result_of<this_type, T>::type
+	eval(T const& src){
+		return apply<T, case_type>(src);
 	}
 	
 	template<typename T>
-	result_type
+	typename result_of<this_type, T>::type
 	operator ()(T const& src){
-		return ( base_type::equal(src) ) ? eval() : next_(src);
+		return ( base_type::equal(src) ) ? eval(src) : next_(src);
 	}
 	
 	next_type next(){
@@ -161,29 +162,21 @@ struct case_next
 	}
 	
 private:
-	template<typename U>
-	typename next_type::result_type
-	apply(typename boost::enable_if<is_fall_through<U> >::type* =0){
-		return next_.eval();
+	template<typename T, typename U>
+	typename result_of<this_type, T>::type
+	apply(T const& src, typename boost::enable_if<is_fall_through<U> >::type* =0){
+		return next_.eval(src);
 	}
 	
-	template<typename U>
-	typename base_type::result_type
-	apply(typename boost::disable_if<is_fall_through<U> >::type* =0){
-		return base_type::eval();
+	template<typename T, typename U>
+	typename result_of<this_type, T>::type
+	apply(T const& src, typename boost::disable_if<is_fall_through<U> >::type* =0){
+		return base_type::eval(src);
 	}
 	
 	next_type next_;
 };
 
-template<typename caseT, typename nextT>
-typename boost::enable_if_c<
-	boost::is_base_of<case_impl<typename caseT::pred_type>, caseT>::value,
-	case_next<caseT, nextT>
->::type
-operator |=(caseT const& case_, nextT const& next){
-	return case_next<caseT, nextT>(case_, next);
-}
 
 template<typename T>
 struct equal_value{

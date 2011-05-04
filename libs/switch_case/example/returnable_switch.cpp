@@ -22,7 +22,6 @@ namespace sc = kmt::switch_case;
 
 int
 main(){
-	
 	std::string input = "yes";
 	
 	std::string result

@@ -33,7 +33,7 @@ fizz_buzz(int n){
 		|=sc::case_(make_tuple(0, 0))|sc::var(std::string("fizz_buzz"))
 		|=sc::case_(make_tuple(0, _))|sc::var(std::string("fizz"))
 		|=sc::case_(make_tuple(_, 0))|sc::var(std::string("buzz"))
-		|=sc::default_|sc::var(boost::lexical_cast<std::string>(n));
+		|=sc::default_               |sc::var(boost::lexical_cast<std::string>(n));
 }
 
 

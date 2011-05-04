@@ -4,6 +4,7 @@
 #include <kmt/switch_case/include/var.hpp>
 #include <kmt/switch_case/include/case_variant.hpp>
 #include <kmt/switch_case/include/returnable_switch.hpp>
+#include <kmt/switch_case/include/lambda_adaptor.hpp>
 
 #include <iostream>
 #include <string>
@@ -46,11 +47,19 @@ struct result<sc::detail::empty_case, Seq>{
 };
 */
 
+void
+test1(){
+	sc::switch_(20)
+		|=sc::case_(10)|std::cout << boost::lambda::_1|std::cout << boost::lambda::_1
+		|=sc::case_(20)|std::cout << boost::lambda::_1;
+}
+
 struct disp{
 	typedef void result_type;
 	disp(std::string const& str) : str_(str){}
-	void operator()() const{
-		std::cout << str_ << std::endl;
+	template<typename T>
+	void operator()(T const& t) const{
+		std::cout << t << ":" << str_ << std::endl;
 	}
 private:
 	std::string str_;
@@ -113,6 +122,7 @@ test5(){
 
 void
 run(){
+	test1();
 	using sc::case_;
 	sc::switch_(1)
 		|=case_(0)
@@ -128,7 +138,7 @@ run(){
 	catch(std::exception& exp){
 		std::cout << "exp :" << exp.what() << std::endl;
 	}
-
+	
 	std::cout << test3("yes") << std::endl;
 	std::cout << test3("no") << std::endl;
 	test2(10);

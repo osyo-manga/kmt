@@ -22,14 +22,15 @@ template<typename T>
 struct functionable_holder{
 	typedef T result_type;
 	
-	explicit functionable_holder(T t) : value(t){}
+	explicit functionable_holder(T const& t) : value(t){}
 	
-	result_type
-	operator ()(){
+	template<typename U>
+	T operator ()(U const&){
 		return value;
 	}
-	result_type
-	operator ()() const{
+	
+	template<typename U>
+	T operator ()(U const&) const{
 		return value;
 	}
 private:

@@ -16,6 +16,7 @@
 
 #include "switch.hpp"
 #include "case.hpp"
+#include "adaptor.hpp"
 #include "default.hpp"
 
 #endif // #ifdef KMT_SWITCH_CASE_INCLUDE_SWITCH_CASE_H

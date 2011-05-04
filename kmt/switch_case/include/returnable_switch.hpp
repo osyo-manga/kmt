@@ -1,6 +1,6 @@
 //
 // kmt-library
-//
+///
 // Copyright (c) 2011 
 // osyo-manga : http://d.hatena.ne.jp/osyo-manga/
 // 
@@ -41,7 +41,7 @@ struct returnable_switch_impl{
 	eval(case_t case_,
 		typename boost::disable_if<has_next_type<case_t> >::type* =0
 	) const{
-		return case_.equal(value_) ? case_.eval() : no_match<result_type>();
+		return case_.equal(value_) ? case_.eval(value_) : no_match<result_type>();
 	}
 	
 	template<typename case_t>
@@ -59,7 +59,7 @@ private:
 	eval_next(case_t case_,
 		typename boost::enable_if<is_fall_through<case_t> >::type* =0
 	) const{
-		return (case_.next().eval());
+		return (case_.next().eval(value_));
 	}
 	
 	template<typename case_t>
@@ -67,7 +67,7 @@ private:
 	eval_next(case_t case_,
 		typename boost::disable_if<is_fall_through<case_t> >::type* =0
 	) const{
-		return static_cast<typename case_t::base_type>(case_).eval();
+		return static_cast<typename case_t::base_type>(case_).eval(value_);
 	}
 	
 	value_type value_;

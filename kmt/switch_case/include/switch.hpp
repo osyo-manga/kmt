@@ -14,6 +14,8 @@
 #ifndef KMT_SWITCH_CASE_INCLUDE_SWITCH_H
 #define KMT_SWITCH_CASE_INCLUDE_SWITCH_H
 
+#include "case.hpp"
+
 namespace kmt{ namespace switch_case{
 
 namespace detail{
@@ -26,7 +28,7 @@ struct switch_impl{
 		: value_(value){}
 	
 	template<typename case_t>
-	typename case_t::result_type
+	typename result_of<case_t, T>::type
 	operator |=(case_t case_) const{
 		return case_(value_);
 	}

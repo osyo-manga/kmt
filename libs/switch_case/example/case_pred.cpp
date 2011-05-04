@@ -21,9 +21,12 @@
 #include <iostream>
 
 struct disp{
+	typedef void result_type;
+	
 	disp(std::string str) : str_(str){};
 	
-	void operator ()() const{
+	template<typename T>
+	void operator ()(T const&) const{
 		std::cout << str_ << std::endl;
 	}
 private:
@@ -38,7 +41,8 @@ main(){
 	
 	boost::for_each(boost::irange(0, 10),
 		  sc::case_pred(_1 % 2 == 0)|disp("even")
-		|=sc::case_    (sc::_)      |disp("odd")
+		|=sc::case_pred(_1 % 2 != 0)|disp("odd")
+		|=sc::case_    (sc::_)      |disp("???")
 	);
 	
 	return 0;
