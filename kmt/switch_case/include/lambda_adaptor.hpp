@@ -40,7 +40,6 @@ operator |(
 	case_expr<caseT, exprT> const& case_,
 	boost::lambda::lambda_functor<Arg> const& expr
 ){
-	std::cout << "test hogehoge" << std::endl;
 	return case_expr<
 		case_expr<caseT, exprT>,
 		boost::lambda::lambda_functor<Arg> const&
