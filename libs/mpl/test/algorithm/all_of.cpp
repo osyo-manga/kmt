@@ -25,27 +25,33 @@
 namespace km = kmt::mpl;
 namespace mpl = boost::mpl;
 
+typedef boost::is_same<mpl::_1, int> is_int;
 
 BOOST_MPL_ASSERT((
-	km::all_of<mpl::vector<int, int, int>, int>
+	km::all_of<mpl::vector<int, int, int>, is_int>
 ));
 
 BOOST_MPL_ASSERT_NOT((
-	km::all_of<mpl::vector<int, int, float>, int>
+	km::all_of<mpl::vector<char, double, float>, is_int>
 ));
 
 BOOST_MPL_ASSERT_NOT((
-	km::all_of_if<
+	km::all_of<mpl::vector<int, int, float>, is_int>
+));
+
+BOOST_MPL_ASSERT_NOT((
+	km::all_of<
 		mpl::range_c<int, 1, 10>,
 		mpl::equal_to<mpl::_, mpl::int_<1> >
 	>
 ));
 
-BOOST_MPL_ASSERT_NOT((
+BOOST_MPL_ASSERT((
 	km::all_of<
-		mpl::vector_c<int, 1, 1, 1>, mpl::int_<1>
+		mpl::vector<>, is_int
 	>
 ));
+
 
 int
 test_main(int argc, char* argv[]){
