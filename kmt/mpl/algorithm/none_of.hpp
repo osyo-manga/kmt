@@ -14,8 +14,10 @@
 #ifndef KMT_MPL_ALGORITHM_NONE_OF_H
 #define KMT_MPL_ALGORITHM_NONE_OF_H
 
-#include <boost/mpl/count_if.hpp>
+#include <boost/mpl/find_if.hpp>
+#include <boost/mpl/end.hpp>
 #include <boost/mpl/equal_to.hpp>
+#include "../equal_type.hpp"
 
 namespace kmt{ namespace mpl{
 
@@ -24,9 +26,9 @@ template<
 	typename Pred
 >
 struct none_of: 
-	boost::mpl::equal_to<
-		boost::mpl::count_if<Seq, Pred>,
-		boost::mpl::int_<0>
+	equal_type<
+		boost::mpl::find_if<Seq, Pred>,
+		boost::mpl::end<Seq>
 	>{};
 
 } } // namespace kmt{ namespace mpl{

@@ -54,6 +54,10 @@ BOOST_MPL_ASSERT_NOT((
 	km::none_of<mpl::vector_c<int, 1, 2, 3>, not_equal_1>
 ));
 
+BOOST_MPL_ASSERT((
+	km::none_of<mpl::vector<>, not_equal_1>
+));
+
 
 
 int
