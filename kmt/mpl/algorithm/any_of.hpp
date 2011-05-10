@@ -14,8 +14,8 @@
 #ifndef KMT_MPL_ALGORITHM_ANY_OF_H
 #define KMT_MPL_ALGORITHM_ANY_OF_H
 
-#include <boost/mpl/count_if.hpp>
-#include <boost/mpl/less_equal.hpp>
+#include "none_of.hpp"
+#include <boost/mpl/not.hpp>
 #include <boost/mpl/empty.hpp>
 #include <boost/mpl/or.hpp>
 
@@ -28,10 +28,7 @@ template<
 struct any_of :
 	boost::mpl::or_<
 		boost::mpl::empty<Seq>,
-		boost::mpl::less_equal<
-			boost::mpl::int_<1>,
-			boost::mpl::count_if<Seq, Pred>
-		>
+		boost::mpl::not_<none_of<Seq, Pred> >
 	>{};
 
 } } // namespace kmt{ namespace mpl{
