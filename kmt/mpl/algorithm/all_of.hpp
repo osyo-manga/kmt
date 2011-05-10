@@ -14,9 +14,14 @@
 #ifndef KMT_MPL_ALGORITHM_ALL_OF_H
 #define KMT_MPL_ALGORITHM_ALL_OF_H
 
-#include <boost/mpl/count_if.hpp>
-#include <boost/mpl/size.hpp>
+#include "find_if_not.hpp"
+#include "../equal_type.hpp"
+#include <boost/mpl/end.hpp>
+#include <boost/type_traits/is_same.hpp>
 #include <boost/mpl/equal_to.hpp>
+
+#include <boost/mpl/lambda.hpp>
+#include <boost/mpl/apply.hpp>
 
 namespace kmt{ namespace mpl{
 
@@ -25,9 +30,9 @@ template<
 	typename Pred
 >
 struct all_of
-	: boost::mpl::equal_to<
-		boost::mpl::count_if<Seq, Pred>,
-		boost::mpl::size<Seq>
+	: equal_type<
+		find_if_not<Seq, Pred>,
+		boost::mpl::end<Seq>
 	>{};
 
 } } // namespace kmt{ namespace mpl{
