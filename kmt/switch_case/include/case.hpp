@@ -31,7 +31,7 @@ namespace detail{
 
 namespace mpl = boost::mpl;
 
-template<typename F, typename Arg = void>
+template<typename F, typename Arg>
 struct result_of : boost::result_of<F(Arg)>{};
 
 template<typename F, typename Arg>
@@ -98,7 +98,7 @@ struct case_expr : caseT{
 	
 	template<typename T>
 	struct result{
-		typedef typename result_of<expr_type>::type type;
+		typedef typename result_of<expr_type, T>::type type;
 	};
 	
 	case_expr(case_type const& case_, expr_type expr)

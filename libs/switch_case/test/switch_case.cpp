@@ -47,6 +47,26 @@ struct result<sc::detail::empty_case, Seq>{
 };
 */
 
+namespace kmt{ namespace switch_case {
+
+namespace detail{
+
+
+struct fall_through_impl{
+	typedef void result_type;
+	template<typename T>
+	void operator ()(T const&) const{}
+}fall_through;
+
+template<>
+struct is_fall_through<fall_through_impl> : mpl::true_{};
+
+}
+
+using detail::fall_through;
+
+}} // namespace kmt { namesapce switch_case
+
 void
 test1(){
 	sc::switch_(20)
@@ -121,6 +141,15 @@ test5(){
 }
 
 void
+test6(){
+	using boost::lambda::_1;
+	std::cout << "=test6=" << std::endl;
+	sc::switch_(10)
+		|=sc::case_(10)|std::cout << _1 << "hogehoge\n"|sc::fall_through
+		|=sc::case_(20)|std::cout << _1 << "test6\n";
+}
+
+void
 run(){
 	test1();
 	using sc::case_;
@@ -156,7 +185,7 @@ run(){
 	test4(std::string("hogehoge"));
 	
 	test5();
-
+	test6();
 }
 
 int
