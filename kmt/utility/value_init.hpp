@@ -16,7 +16,7 @@
 
 #include <boost/utility/value_init.hpp>
 #include <boost/utility/enable_if.hpp>
-#include <boost/mpl/has_xxx.hpp>
+#include "../type_traits/detail/has_value_type.hpp"
 
 namespace kmt{
 
@@ -47,8 +47,6 @@ struct initialized_impl<T, Initializer,
 	explicit initialized_impl(T const& arg) : base_type(arg){}
 };
 
-
-BOOST_MPL_HAS_XXX_TRAIT_DEF(value_type);
 
 // T::value_type があり、Initializer が initializer_empty の場合
 template<typename T>

@@ -15,19 +15,17 @@
 #define KMT_MPL_EQUAL_TYPE_H
 
 #include <boost/type_traits/is_same.hpp>
-#include <boost/mpl/has_xxx.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/identity.hpp>
+#include "../type_traits/detail/has_type.hpp"
 
 namespace kmt{ namespace mpl{
 
 namespace detail{
 
-BOOST_MPL_HAS_XXX_TRAIT_DEF(type);
-
 template<typename T>
 struct extract :
-	boost::mpl::eval_if<has_type<T>, T, boost::mpl::identity<T> >{};
+	boost::mpl::eval_if<kmt::detail::has_type<T>, T, boost::mpl::identity<T> >{};
 
 }  // namespace detail{
 
