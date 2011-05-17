@@ -23,6 +23,7 @@
 namespace kmt{ namespace mpl{
 
 namespace detail{
+
 template<typename T, typename Index>
 struct with_index_impl{
 	typedef T type;
@@ -30,6 +31,7 @@ struct with_index_impl{
 };
 
 }  // namespace detail
+
 
 template<typename T, typename Index>
 struct with_index
@@ -41,16 +43,15 @@ template<
 	typename F
 >
 void for_each_with_index(F f, Sequence* =0, TransformOp* =0){
-	namespace mpl = boost::mpl;
-	mpl::for_each<
-		mpl::transform_view<
-			mpl::zip_view<
-				mpl::vector<
+	boost::mpl::for_each<
+		boost::mpl::transform_view<
+			boost::mpl::zip_view<
+				boost::mpl::vector<
 					Sequence,
-					mpl::range_c<int, 0, mpl::size<Sequence>::value>
+					boost::mpl::range_c<int, 0, boost::mpl::size<Sequence>::value>
 				>
 			>,
-			mpl::unpack_args<with_index<mpl::_1, mpl::_2> >
+			boost::mpl::unpack_args<with_index<boost::mpl::_1, boost::mpl::_2> >
 		>,
 		TransformOp
 	>(f);
@@ -65,5 +66,6 @@ void for_each_with_index(F f, Sequence* =0){
 }
 
 } } // namespace kmt{ namespace mpl{
+
 
 #endif /* KMT_MPL_FOR_EACH_WITH_INDEX_H */
