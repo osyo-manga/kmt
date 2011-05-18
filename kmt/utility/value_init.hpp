@@ -50,7 +50,7 @@ struct initialized_impl<T, Initializer,
 
 // T::value_type があり、Initializer が initializer_empty の場合
 template<typename T>
-struct initialized_impl<T, void, typename boost::enable_if<has_value_type<T> >::type >
+struct initialized_impl<T, initializer_empty, typename boost::enable_if<has_value_type<T> >::type >
 	: boost::initialized<typename T::value_type>{
 	typedef boost::initialized<typename T::value_type> base_type;
 	initialized_impl() : 
