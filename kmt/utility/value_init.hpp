@@ -14,6 +14,7 @@
 #ifndef KMT_UTILITY_VALUE_INIT_H
 #define KMT_UTILITY_VALUE_INIT_H
 
+#include <boost/type_traits/is_same.hpp>
 #include <boost/utility/value_init.hpp>
 #include <boost/utility/enable_if.hpp>
 #include "../type_traits/detail/has_value_type.hpp"
