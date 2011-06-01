@@ -35,7 +35,7 @@ struct case_<F, S,
 	: boost::mpl::pair<F, boost::mpl::always<S> > {};
 
 template<typename S>
-struct default_ : boost::mpl::pair<boost::mpl::always<boost::mpl::true_>, S>{};
+struct default_ : case_<boost::mpl::always<boost::mpl::true_>, S>{};
 
 
 } } // namespace kmt{ namespace mpl{
