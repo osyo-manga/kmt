@@ -19,19 +19,34 @@
 
 namespace sc = kmt::switch_case;
 
-int
-main(){
-	
-	std::string input = "yes";
-	
+
+/*
+[output]
+ok
+ok
+ok
+error
+*/
+
+
+std::string
+check(std::string const& input){
 	std::string result
 	= sc::switch_(input)
 		|=sc::case_(std::string("yes"))
 		|=sc::case_(std::string("y"))
 		|=sc::case_(std::string("Y"))|sc::var(std::string("ok"))
 		|=sc::default_|sc::var(std::string("error"));
+	return result;
+}
+
+int
+main(){
 	
-	std::cout << result << std::endl;
-	
+	std::cout << check("yes") << std::endl;
+	std::cout << check("y") << std::endl;
+	std::cout << check("Y") << std::endl;
+	std::cout << check("NO!") << std::endl;
+
 	return 0;
 }
