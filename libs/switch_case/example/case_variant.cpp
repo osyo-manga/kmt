@@ -11,6 +11,7 @@
 // Boost Software License - Version 1.0
 // <http://www.boost.org/LICENSE_1_0.txt>
 //
+#include <boost/mpl/print.hpp>
 #include <kmt/switch_case/include/case_variant.hpp>
 #include <kmt/switch_case/include/var.hpp>
 #include <kmt/switch_case/include/switch_case.hpp>
@@ -20,6 +21,7 @@
 #include <string>
 
 namespace sc = kmt::switch_case;
+
 
 std::string
 check(boost::variant<int, float, char, std::string> var){
@@ -37,3 +39,11 @@ main(){
 	std::cout << check('c') << std::endl;
 	return 0;
 }
+
+/*
+[output]
+int
+float
+other type
+other type
+*/

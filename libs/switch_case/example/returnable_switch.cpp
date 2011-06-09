@@ -24,6 +24,7 @@ int
 main(){
 	std::string input = "yes";
 	
+	// 戻り値型（var の引数）を std::string で保持する
 	std::string result
 	= sc::returnable_switch<std::string>(input)
 		|=sc::case_(std::string("yes"))
@@ -35,3 +36,8 @@ main(){
 	
 	return 0;
 }
+
+/*
+[output]
+ok
+*/

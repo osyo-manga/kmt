@@ -20,6 +20,22 @@
 
 #include <iostream>
 
+int
+main(){
+	
+	namespace sc = kmt::switch_case;
+	using boost::lambda::_1;
+	
+	boost::for_each(boost::irange(-5, 10),
+		  sc::case_pred(_1 < 0)     |std::cout << _1 << ":is minus\n"
+		|=sc::case_pred(_1 % 2 == 0)|std::cout << _1 << ":is even\n" 
+		|=sc::case_pred(_1 % 2 != 0)|std::cout << _1 << ":is odd\n"
+		|=sc::default_              |std::cout << _1 << ":is ???\n"
+	);
+	
+	return 0;
+}
+
 /*
 [output]
 -5:is minus
@@ -38,20 +54,3 @@
 8:is even
 9:is odd
 */
-
-int
-main(){
-	
-	namespace sc = kmt::switch_case;
-	using boost::lambda::_1;
-	
-	boost::for_each(boost::irange(-5, 10),
-		  sc::case_pred(_1 < 0)     |std::cout << _1 << ":is minus\n"
-		|=sc::case_pred(_1 % 2 == 0)|std::cout << _1 << ":is even\n" 
-		|=sc::case_pred(_1 % 2 != 0)|std::cout << _1 << ":is odd\n"
-		|=sc::default_              |std::cout << _1 << ":is ???\n"
-	);
-	
-	return 0;
-}
-

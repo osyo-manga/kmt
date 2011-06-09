@@ -20,6 +20,8 @@
 #include <string>
 #include <iostream>
 
+
+
 struct disp{
 	typedef void result_type;
 	
@@ -47,3 +49,17 @@ main(){
 	
 	return 0;
 }
+
+/*
+[output]
+even
+odd
+even
+odd
+even
+odd
+even
+odd
+even
+odd
+*/

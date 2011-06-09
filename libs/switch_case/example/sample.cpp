@@ -28,7 +28,12 @@ ok
 error
 */
 
-
+/*
+	if( input == "yes" || input == "y" || input == "Y" )
+		return "ok";
+	else
+		return "error";
+*/
 std::string
 check(std::string const& input){
 	std::string result

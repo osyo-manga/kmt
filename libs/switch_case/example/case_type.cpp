@@ -20,9 +20,11 @@
 
 namespace sc = kmt::switch_case;
 
+
 template<typename T>
 std::string
 check(T t){
+	// T の型によって、switch case を行う
 	return sc::switch_(t)
 		|=sc::case_type<int>()  |sc::var(std::string("int"))
 		|=sc::case_type<float>()|sc::var(std::string("float"))
@@ -37,3 +39,11 @@ main(){
 	std::cout << check(std::string("hoge")) << std::endl;
 	return 0;
 }
+
+/*
+[output]
+int
+float
+other type
+other type
+*/
