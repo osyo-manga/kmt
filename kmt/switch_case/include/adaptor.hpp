@@ -53,18 +53,6 @@ case_expr<case_expr<caseT, exprT>, T const&>
 operator |(case_expr<caseT, exprT> const& case_, T const& expr){
 	return case_expr<case_expr<caseT, exprT>, T const&>(case_, expr);
 }
-
-// template<typename caseT, typename nextT, typename T>
-// case_expr<case_next<caseT, nextT>, T&>
-// operator |(case_next<caseT, nextT> const& case_, T& expr){
-// 	return case_expr<case_next<caseT, nextT>, T&>(case_, expr);
-// }
-// 
-// template<typename caseT, typename nextT, typename T>
-// case_expr<case_next<caseT, nextT>, T const&>
-// operator |(case_next<caseT, nextT> const& case_, T const& expr){
-// 	return case_expr<case_next<caseT, nextT>, T const&>(case_, expr);
-// }
  
 
 }  // namespace detail
