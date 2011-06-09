@@ -15,6 +15,11 @@
 #define KMT_SWITCH_CASE_INCLUDE_CASE_VARIANT_H
 
 #include <boost/variant/get.hpp>
+#include <boost/variant/variant.hpp>
+#include <boost/utility/enable_if.hpp>
+
+#include "../../type_traits/is_same.hpp"
+#include "../../mpl/algorithm/fill.hpp"
 #include "case.hpp"
 
 namespace kmt{ namespace switch_case{
@@ -23,9 +28,28 @@ namespace detail{
 
 template<typename T>
 struct equal_variant_type{
+	
 	template<typename U>
-	bool operator ()(U const& u) const{
+	struct is_variant
+		: is_same<typename kmt::mpl::fill<boost::variant<>, kmt::_>::type, U>{};
+	
+	template<typename U>
+	typename boost::enable_if<
+		is_variant<U>,
+		bool
+	>::type
+	operator ()(U const& u) const{
 		return boost::get<T>(&u) ? true : false;
+	}
+	
+	// Boost.Variant だった場合は false を返す
+	template<typename U>
+	typename boost::disable_if<
+		is_variant<U>,
+		bool
+	>::type
+	operator ()(U const& u) const{
+		return false;
 	}
 };
 
