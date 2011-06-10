@@ -44,7 +44,7 @@
 		boost::mpl::at_c<Seq, n>::type::value
 	
 	#define PP_C_ARRYA_AC_C_INITIALIZER(n)	\
-		{ BOOST_PP_ENUM(n, PP_C_ARRAY_AC_C, _)  }
+		{ { BOOST_PP_ENUM(n, PP_C_ARRAY_AC_C, _)  } }
 #endif
 
 
