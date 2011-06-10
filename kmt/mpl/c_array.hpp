@@ -18,6 +18,7 @@
 #include <boost/mpl/identity.hpp>
 #include <boost/mpl/apply.hpp>
 #include <boost/mpl/at.hpp>
+#include <boost/mpl/front.hpp>
 #include <boost/array.hpp>
 
 #include <kmt/utility/value_init.hpp>
@@ -73,7 +74,8 @@ struct c_array_impl<Seq, n, ArrayType>{                     \
 	                                                        \
 	typedef typename boost::mpl::apply<                     \
 		ArrayType,                                          \
-		typename Seq::value_type, boost::mpl::size<Seq>     \
+		typename boost::mpl::front<Seq>::type::value_type,  \
+		boost::mpl::size<Seq>                               \
 	>::type value_type;                                     \
 	                                                        \
 	static value_type const value;                          \
