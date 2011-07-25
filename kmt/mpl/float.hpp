@@ -37,10 +37,6 @@ struct keta_impl :
 template<typename T>
 struct keta : detail::keta_impl<T>{};
 
-}  // namespace detai
-
-namespace detail{
-
 template<std::size_t N, std::size_t M,
 	typename keta = pow<boost::mpl::int_<10>, 
 		detail::keta<boost::mpl::integral_c<std::size_t, M> > > >
