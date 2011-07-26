@@ -20,14 +20,14 @@ namespace kmt{ namespace switch_case{
 
 namespace detail{
 
-template<typename R, typename U>
+template<typename R, typename V>
 struct returnable_switch_impl{
 	
 	BOOST_MPL_HAS_XXX_TRAIT_DEF(next_type);
-	typedef U value_type;
+	typedef V value_type;
 	typedef R result_type;
 	
-	explicit returnable_switch_impl(U const& value)
+	explicit returnable_switch_impl(value_type const& value)
 		: value_(value){}
 	
 	template<typename case_t>
