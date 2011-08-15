@@ -22,7 +22,6 @@
 #include <boost/type_traits/is_same.hpp>
 #include <boost/range/algorithm/equal.hpp>
 
-
 #include <vector>
 
 
